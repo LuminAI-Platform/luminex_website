@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 py-4 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        
+
         <div className="flex items-center gap-3">
           <div className="relative w-12 h-12 rounded overflow-hidden">
             <Image
@@ -32,6 +32,7 @@ export default function Navbar() {
           <a href="/#services" className="hover:text-brand-red transition-colors">Services</a>
           <a href="/#operations" className="hover:text-brand-red transition-colors">Operations</a>
           <a href="/#team" className="hover:text-brand-red transition-colors">Leadership</a>
+          <a href="/#about" className="hover:text-brand-red transition-colors">About Us</a>
         </nav>
 
         <div className="hidden md:block">
