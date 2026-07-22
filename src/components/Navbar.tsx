@@ -16,6 +16,7 @@ export default function Navbar() {
               src="/logo.jpeg"
               alt="Luminex Logistics Logo"
               fill
+              sizes="48px"
               className="object-cover"
               preload
             />
