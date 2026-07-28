@@ -27,13 +27,12 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="hidden md:flex gap-6 font-semibold text-sm text-slate-600">
-          <a href="/" className="hover:text-brand-red transition-colors">Home</a>
-          <a href="/track" className="hover:text-brand-red transition-colors">Track Documents</a>
-          <a href="/#services" className="hover:text-brand-red transition-colors">Services</a>
-          <a href="/#operations" className="hover:text-brand-red transition-colors">Operations</a>
-          <a href="/#team" className="hover:text-brand-red transition-colors">Leadership</a>
-          <a href="/#about" className="hover:text-brand-red transition-colors">About Us</a>
+        <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
+          <a href="/" className="text-brand-red-500 font-semibold relative py-1 border-b-2 border-brand-red-500">Home</a>
+          <a href="/track" className="hover:text-brand-red-500 transition-colors">Track Documents</a>
+          <a href="/#services" className="hover:text-brand-red-500 transition-colors">Services</a>
+          <a href="/#operations" className="hover:text-brand-red-500 transition-colors">Operations</a>
+          <a href="/#team" className="hover:text-brand-red-500 transition-colors">Leadership</a>
         </nav>
 
         <div className="hidden md:block">
