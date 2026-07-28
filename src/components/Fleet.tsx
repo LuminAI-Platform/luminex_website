@@ -38,17 +38,19 @@ const testimonials: Testimonial[] = [
 export default function Fleet() {
   return (
     <section id="operations" className="bg-slate-50 py-16 md:py-24 border-t border-slate-100">
-      <div className="max-w-6xl mx-auto px-4">
+      {/* Both header & grid sit inside this single max-w container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        
         {/* Section Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-3">
             {/* Vertical Red Accent Bar */}
-            <div className="w-1.5 h-8 bg-brand-red-500 rounded-full" />
+            <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
             <h2 className="text-3xl md:text-4xl font-black text-navy-900">
               Trust from Ghana's Leading Institutions
             </h2>
           </div>
-          <p className="text-slate-500 max-w-2xl pl-4.5">
+          <p className="text-slate-500 max-w-2xl pl-4.5 text-base">
             Our commitment to security and precision has made us the preferred
             logistics partner for the nation's most demanding sectors.
           </p>
@@ -59,10 +61,10 @@ export default function Fleet() {
           {testimonials.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col justify-between shadow-sm"
+              className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-between shadow-sm"
             >
               <div>
-                {/* 5-Star Rating */}
+                {/* Stars */}
                 <div className="flex items-center gap-1 text-brand-red-500 mb-4" aria-label={`${item.rating} out of 5 stars`}>
                   {Array.from({ length: item.rating }).map((_, index) => (
                     <span key={index} className="text-lg">
@@ -71,13 +73,13 @@ export default function Fleet() {
                   ))}
                 </div>
 
-                {/* Quote Text */}
+                {/* Quote */}
                 <p className="italic text-slate-600 text-sm leading-relaxed mb-6">
                   "{item.quote}"
                 </p>
               </div>
 
-              {/* Author & Title */}
+              {/* Author Info */}
               <div>
                 <h3 className="font-bold text-navy-900">{item.author}</h3>
                 <p className="text-xs text-slate-400 italic mt-0.5">{item.title}</p>
@@ -85,6 +87,7 @@ export default function Fleet() {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
