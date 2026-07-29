@@ -47,12 +47,12 @@ export default function Fleet() {
             {/* Vertical Red Accent Bar */}
             <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
             <h2 className="text-3xl md:text-4xl font-black text-navy-900">
-              Trust from Ghana's Leading Institutions
+              Trust from Ghana&apos;s Leading Institutions
             </h2>
           </div>
           <p className="text-slate-500 max-w-2xl pl-4.5 text-base">
             Our commitment to security and precision has made us the preferred
-            logistics partner for the nation's most demanding sectors.
+            logistics partner for the nation&apos;s most demanding sectors.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export default function Fleet() {
 
                 {/* Quote */}
                 <p className="italic text-slate-600 text-sm leading-relaxed mb-6">
-                  "{item.quote}"
+                  &quot;{item.quote}&quot;
                 </p>
               </div>
 
