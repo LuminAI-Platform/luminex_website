@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,20 +29,20 @@ export default function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
-          <a href="/" className="text-brand-red-500 font-semibold relative py-1 border-b-2 border-brand-red-500">Home</a>
-          <a href="/track" className="hover:text-brand-red-500 transition-colors">Track Documents</a>
-          <a href="/#services" className="hover:text-brand-red-500 transition-colors">Services</a>
-          <a href="/#operations" className="hover:text-brand-red-500 transition-colors">Operations</a>
-          <a href="/#team" className="hover:text-brand-red-500 transition-colors">Leadership</a>
+          <Link href="/" className="text-brand-red-500 font-semibold relative py-1 border-b-2 border-brand-red-500">Home</Link>
+          <Link href="/track" className="hover:text-brand-red-500 transition-colors">Track Documents</Link>
+          <Link href="/#services" className="hover:text-brand-red-500 transition-colors">Services</Link>
+          <Link href="/#operations" className="hover:text-brand-red-500 transition-colors">Operations</Link>
+          <Link href="/#team" className="hover:text-brand-red-500 transition-colors">Leadership</Link>
         </nav>
 
         <div className="hidden md:block">
-          <a
+          <Link
             href="/book"
             className="px-4 py-2 bg-navy-900 text-white rounded font-bold hover:bg-brand-red transition-colors"
           >
             Book Courier
-          </a>
+          </Link>
         </div>
 
         <button
@@ -55,12 +56,12 @@ export default function Navbar() {
 
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-3 font-semibold text-slate-700">
-          <a href="/" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Home</a>
-          <a href="/track" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Track Documents</a>
-          <a href="/#services" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Services</a>
-          <a href="/#operations" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Operations</a>
-          <a href="/#team" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Leadership</a>
-          <a href="/book" onClick={() => setIsOpen(false)} className="block text-center bg-navy-900 text-white py-2 rounded">Book Courier</a>
+          <Link href="/" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Home</Link>
+          <Link href="/track" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Track Documents</Link>
+          <Link href="/#services" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Services</Link>
+          <Link href="/#operations" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Operations</Link>
+          <Link href="/#team" onClick={() => setIsOpen(false)} className="block hover:text-brand-red">Leadership</Link>
+          <Link href="/book" onClick={() => setIsOpen(false)} className="block text-center bg-navy-900 text-white py-2 rounded">Book Courier</Link>
         </div>
       )}
     </header>

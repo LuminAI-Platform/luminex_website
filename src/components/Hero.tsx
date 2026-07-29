@@ -16,7 +16,7 @@ export default function Hero() {
 
       {/* Hero Content */}
       <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight sm:leading-none max-w-3xl mb-6">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight sm:leading-none max-w-3xl mb-6">
           Secure Document Delivery Across Ghana
         </h1>
         
@@ -27,7 +27,7 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md">
           <Link
             href="/track"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-brand-red-600 hover:bg-brand-red-700 text-white font-bold text-sm rounded shadow-lg transition-all duration-200"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-brand-red-500 hover:bg-brand-red-600 text-white font-bold text-sm rounded shadow-lg transition-all duration-200"
           >
             <Truck className="w-5 h-5" />
             <span>Track Shipment</span>
