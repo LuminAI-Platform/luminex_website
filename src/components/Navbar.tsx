@@ -12,25 +12,80 @@ export default function Navbar() {
 
   useEffect(() => {
     if (pathname !== "/") {
-      setActiveHash("");
       return;
     }
+
+    // Initialize active hash asynchronously on mount/navigation to prevent setState-in-effect warning
+    const timer = setTimeout(() => {
+      if (typeof window !== "undefined") {
+        setActiveHash(window.location.hash);
+      }
+    }, 0);
 
     const handleHashChange = () => {
       setActiveHash(window.location.hash);
     };
 
-    handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("popstate", handleHashChange);
+
+    // Setup IntersectionObserver (Scroll Spy) for homepage sections
+    const sectionIds = ["services", "operations", "team"];
+    const sectionElements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    let observer: IntersectionObserver | null = null;
+
+    if (sectionElements.length > 0) {
+      const observerCallback: IntersectionObserverCallback = (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveHash(`#${entry.target.id}`);
+          }
+        });
+
+        if (window.scrollY < 120) {
+          setActiveHash("");
+        }
+      };
+
+      const observerOptions: IntersectionObserverInit = {
+        root: null,
+        rootMargin: "-25% 0px -45% 0px",
+        threshold: 0,
+      };
+
+      observer = new IntersectionObserver(observerCallback, observerOptions);
+      sectionElements.forEach((el) => observer?.observe(el));
+    }
+
+    const handleScroll = () => {
+      if (window.scrollY < 120) {
+        setActiveHash("");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handleHashChange);
+      window.removeEventListener("scroll", handleScroll);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
   }, [pathname]);
 
   const checkIsActive = (href: string) => {
     if (href.startsWith("/#")) {
-      return pathname === "/" && activeHash === href.replace("/", "");
+      const targetHash = href.replace("/", "");
+      return pathname === "/" && activeHash === targetHash;
     }
     if (href === "/") {
-      return pathname === "/" && activeHash === "";
+      return pathname === "/" && (activeHash === "" || activeHash === "#");
     }
     return pathname === href;
   };
@@ -45,9 +100,20 @@ export default function Navbar() {
 
   const handleLinkClick = (href: string) => {
     if (href.startsWith("/#")) {
-      setActiveHash(href.replace("/", ""));
+      const targetHash = href.replace("/", "");
+      setActiveHash(targetHash);
+      if (pathname === "/") {
+        const targetId = targetHash.replace("#", "");
+        const elem = document.getElementById(targetId);
+        if (elem) {
+          elem.scrollIntoView({ behavior: "smooth" });
+        }
+      }
     } else if (href === "/") {
       setActiveHash("");
+      if (pathname === "/") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
   };
 
