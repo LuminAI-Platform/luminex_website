@@ -8,7 +8,7 @@ export default function Hero() {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-luminosity"
-        style={{ backgroundImage: `url('/hero fold.jpg')` }}
+        style={{ backgroundImage: `url('/hero-fold.jpg')` }}
       />
       
       {/* Dark Gradient Overlay for readability */}

@@ -135,7 +135,7 @@ export default function Navbar() {
           </div>
           <div>
             <span className="text-lg font-black text-slate-900 tracking-tight block uppercase">Luminex</span>
-            <span className="text-xs font-bold text-[#b91c1c] tracking-wider block -mt-1">Logistics</span>
+            <span className="text-xs font-bold text-brand-red-600 tracking-wider block -mt-1">Logistics</span>
           </div>
         </Link>
 
@@ -151,8 +151,8 @@ export default function Navbar() {
                 onClick={() => handleLinkClick(link.href)}
                 className={`py-1 transition-colors border-b-2 ${
                   isActive
-                    ? "text-[#b91c1c] font-semibold border-[#b91c1c]"
-                    : "border-transparent hover:text-[#b91c1c]"
+                    ? "text-brand-red-600 font-semibold border-brand-red-600"
+                    : "border-transparent hover:text-brand-red-600"
                 }`}
               >
                 {link.name}
@@ -167,8 +167,8 @@ export default function Navbar() {
             href="/book"
             className={`px-4 py-2 rounded font-bold text-white transition-colors ${
               pathname === "/book"
-                ? "bg-[#b91c1c]"
-                : "bg-slate-900 hover:bg-[#b91c1c]"
+                ? "bg-brand-red-600"
+                : "bg-slate-900 hover:bg-brand-red-600"
             }`}
           >
             Book Courier
@@ -200,8 +200,8 @@ export default function Navbar() {
                   handleLinkClick(link.href);
                   setIsOpen(false);
                 }}
-                className={`block hover:text-[#b91c1c] ${
-                  isActive ? "text-[#b91c1c] font-bold" : ""
+                className={`block hover:text-brand-red-600 ${
+                  isActive ? "text-brand-red-600 font-bold" : ""
                 }`}
               >
                 {link.name}
@@ -211,7 +211,7 @@ export default function Navbar() {
           <Link
             href="/book"
             onClick={() => setIsOpen(false)}
-            className="block text-center bg-slate-900 text-white py-2 rounded font-bold hover:bg-[#b91c1c] transition-colors"
+            className="block text-center bg-slate-900 text-white py-2 rounded font-bold hover:bg-brand-red-600 transition-colors"
           >
             Book Courier
           </Link>
