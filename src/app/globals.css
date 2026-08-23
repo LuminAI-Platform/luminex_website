@@ -58,3 +58,6 @@ body {
   background: #c0392b;
 }
 
+html {
+  scroll-behavior: smooth;
+}

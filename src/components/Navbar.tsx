@@ -1,26 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+const NAV_LINKS = [
+  { name: "Home", href: "/" },
+  { name: "Track Documents", href: "/track" },
+  { name: "Services", href: "/#services" },
+  { name: "About Us", href: "/about" },
+  { name: "FAQ", href: "/faq" },
+  { name: "Contact", href: "/contact" },
+];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (pathname !== "/") {
-      return;
-    }
+  if (pathname !== "/" && activeHash !== "") {
+    setActiveHash("");
+  }
 
-    // Initialize active hash asynchronously on mount/navigation to prevent setState-in-effect warning
-    const timer = setTimeout(() => {
-      if (typeof window !== "undefined") {
-        setActiveHash(window.location.hash);
-      }
-    }, 0);
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    if (typeof window !== "undefined" && window.location.hash) {
+      const initialHash = window.location.hash;
+      requestAnimationFrame(() => {
+        setActiveHash(initialHash);
+      });
+    }
 
     const handleHashChange = () => {
       setActiveHash(window.location.hash);
@@ -29,7 +40,7 @@ export default function Navbar() {
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("popstate", handleHashChange);
 
-    // Setup IntersectionObserver (Scroll Spy) for homepage sections
+    // Scroll spy for homepage sections
     const sectionIds = ["services", "operations", "team"];
     const sectionElements = sectionIds
       .map((id) => document.getElementById(id))
@@ -44,15 +55,11 @@ export default function Navbar() {
             setActiveHash(`#${entry.target.id}`);
           }
         });
-
-        if (window.scrollY < 120) {
-          setActiveHash("");
-        }
       };
 
       const observerOptions: IntersectionObserverInit = {
         root: null,
-        rootMargin: "-25% 0px -45% 0px",
+        rootMargin: "-20% 0px -50% 0px",
         threshold: 0,
       };
 
@@ -61,7 +68,7 @@ export default function Navbar() {
     }
 
     const handleScroll = () => {
-      if (window.scrollY < 120) {
+      if (window.scrollY < 100) {
         setActiveHash("");
       }
     };
@@ -69,34 +76,26 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("hashchange", handleHashChange);
       window.removeEventListener("popstate", handleHashChange);
       window.removeEventListener("scroll", handleScroll);
-      if (observer) {
-        observer.disconnect();
-      }
+      observer?.disconnect();
     };
   }, [pathname]);
 
-  const checkIsActive = (href: string) => {
-    if (href.startsWith("/#")) {
-      const targetHash = href.replace("/", "");
-      return pathname === "/" && activeHash === targetHash;
-    }
-    if (href === "/") {
-      return pathname === "/" && (activeHash === "" || activeHash === "#");
-    }
-    return pathname === href;
-  };
-
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Track Documents", href: "/track" },
-    { name: "Services", href: "/#services" },
-    { name: "Operations", href: "/#operations" },
-    { name: "Leadership", href: "/#team" },
-  ];
+  const checkIsActive = useCallback(
+    (href: string) => {
+      if (href.startsWith("/#")) {
+        const targetHash = href.replace("/", "");
+        return pathname === "/" && activeHash === targetHash;
+      }
+      if (href === "/") {
+        return pathname === "/" && (activeHash === "" || activeHash === "#");
+      }
+      return pathname === href;
+    },
+    [pathname, activeHash]
+  );
 
   const handleLinkClick = (href: string) => {
     if (href.startsWith("/#")) {
@@ -118,11 +117,14 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 py-4 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 py-4 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-
         {/* Brand Logo */}
-        <Link href="/" onClick={() => handleLinkClick("/")} className="flex items-center gap-3">
+        <Link
+          href="/"
+          onClick={() => handleLinkClick("/")}
+          className="flex items-center gap-3"
+        >
           <div className="relative w-12 h-12 rounded overflow-hidden">
             <Image
               src="/logo.jpeg"
@@ -134,14 +136,18 @@ export default function Navbar() {
             />
           </div>
           <div>
-            <span className="text-lg font-black text-slate-900 tracking-tight block uppercase">Luminex</span>
-            <span className="text-xs font-bold text-brand-red-600 tracking-wider block -mt-1">Logistics</span>
+            <span className="text-lg font-black text-slate-900 tracking-tight block uppercase">
+              Luminex
+            </span>
+            <span className="text-xs font-bold text-brand-red-600 tracking-wider block -mt-1">
+              Logistics
+            </span>
           </div>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
-          {navLinks.map((link) => {
+          {NAV_LINKS.map((link) => {
             const isActive = checkIsActive(link.href);
 
             return (
@@ -177,19 +183,40 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 border border-slate-200 rounded text-slate-600"
-          aria-label="Toggle navigation menu"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="md:hidden p-2 border border-slate-200 rounded text-slate-600 focus:outline-none"
+          aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isOpen}
         >
-          {isOpen ? "✕" : "☰"}
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            {isOpen ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            )}
+          </svg>
         </button>
-
       </div>
 
       {/* Mobile Drawer */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-3 font-semibold text-slate-700">
-          {navLinks.map((link) => {
+          {NAV_LINKS.map((link) => {
             const isActive = checkIsActive(link.href);
 
             return (

@@ -16,8 +16,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Luminex Logistics | Secure Document Delivery Ghana",
-  description: "Luminex Logistics Ltd. (Registration No. CS120930824, TIN C0064381064) is Ghana's premier secure logistics provider. Specializing in secure transport of passports, tax forms, corporate contracts, and legal documents with identity verification and real-time tracking.",
+  title: {
+    default: "Luminex Logistics | Secure Document Delivery Ghana",
+    template: "%s | Luminex Logistics",
+  },
+  description:
+    "Luminex Logistics Ltd. (Registration No. CS120930824, TIN C0064381064) is Ghana's premier secure logistics provider. Specializing in secure transport of passports, tax forms, corporate contracts, and legal documents with identity verification and real-time tracking.",
 };
 
 export default function RootLayout({
@@ -33,9 +37,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-slate-50 text-gray-900 antialiased font-sans">
         <Navbar />
-        <div className="flex-1 flex flex-col">
-          {children}
-        </div>
+        <div className="flex-1 flex flex-col">{children}</div>
         <Footer />
       </body>
     </html>
