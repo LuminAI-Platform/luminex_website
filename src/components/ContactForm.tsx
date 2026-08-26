@@ -5,6 +5,7 @@ import React, { useState } from "react";
 export function ContactForm() {
   const [formData, setFormData] = useState({
     senderName: "",
+    senderEmail: "",
     senderContact: "",
     collectionAddress: "",
     receiverName: "",
@@ -15,11 +16,18 @@ export function ContactForm() {
   });
 
   const [generatedCSN, setGeneratedCSN] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    // Simulate network request delay (replace with real API call)
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
     const randomCSN = `LMX-GRA-${Math.floor(1000 + Math.random() * 9000)}`;
     setGeneratedCSN(randomCSN);
+    setIsSubmitting(false);
   };
 
   return (
@@ -45,7 +53,20 @@ export function ContactForm() {
                 placeholder="e.g. Luminex Corporate Operations"
                 value={formData.senderName}
                 onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="senderEmail" className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+              <input
+                id="senderEmail"
+                type="email"
+                required
+                placeholder="e.g. ops@luminex.com"
+                value={formData.senderEmail}
+                onChange={(e) => setFormData({ ...formData, senderEmail: e.target.value })}
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
 
@@ -53,16 +74,18 @@ export function ContactForm() {
               <label htmlFor="senderContact" className="block text-sm font-semibold text-slate-700 mb-1">Contact Number</label>
               <input
                 id="senderContact"
-                type="text"
+                type="tel"
                 required
-                placeholder="+233 ..."
+                placeholder="+233 XX XXX XXXX"
+                pattern="[\+]?[0-9\s\-]{7,15}"
+                title="Enter a valid phone number (7-15 digits, may include + and spaces)"
                 value={formData.senderContact}
                 onChange={(e) => setFormData({ ...formData, senderContact: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
 
-            <div className="md:col-span-2">
+            <div>
               <label htmlFor="collectionAddress" className="block text-sm font-semibold text-slate-700 mb-1">Collection Location (Digital Address / GPS)</label>
               <input
                 id="collectionAddress"
@@ -71,7 +94,7 @@ export function ContactForm() {
                 placeholder="e.g. GA-123-4567, Accra"
                 value={formData.collectionAddress}
                 onChange={(e) => setFormData({ ...formData, collectionAddress: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
           </div>
@@ -97,7 +120,7 @@ export function ContactForm() {
                 placeholder="Legal name matching ID"
                 value={formData.receiverName}
                 onChange={(e) => setFormData({ ...formData, receiverName: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
 
@@ -105,12 +128,14 @@ export function ContactForm() {
               <label htmlFor="receiverContact" className="block text-sm font-semibold text-slate-700 mb-1">Contact Number</label>
               <input
                 id="receiverContact"
-                type="text"
+                type="tel"
                 required
-                placeholder="+233 ..."
+                placeholder="+233 XX XXX XXXX"
+                pattern="[\+]?[0-9\s\-]{7,15}"
+                title="Enter a valid phone number (7-15 digits, may include + and spaces)"
                 value={formData.receiverContact}
                 onChange={(e) => setFormData({ ...formData, receiverContact: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
 
@@ -123,7 +148,7 @@ export function ContactForm() {
                 placeholder="Secure facility or residential digital address"
                 value={formData.destinationAddress}
                 onChange={(e) => setFormData({ ...formData, destinationAddress: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               />
             </div>
           </div>
@@ -145,11 +170,13 @@ export function ContactForm() {
                 id="description"
                 rows={4}
                 required
+                maxLength={500}
                 placeholder="Briefly describe contents (e.g. Legal contracts, certified blueprints)"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-navy-900 resize-none"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900 resize-none"
               />
+              <p className="text-xs text-slate-400 mt-1 text-right">{formData.description.length}/500</p>
             </div>
 
             <div>
@@ -159,7 +186,7 @@ export function ContactForm() {
                 required
                 value={formData.verificationProtocol}
                 onChange={(e) => setFormData({ ...formData, verificationProtocol: e.target.value })}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 bg-white focus:outline-hidden focus:ring-2 focus:ring-navy-900"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900"
               >
                 <option value="" disabled>Select mandatory ID check</option>
                 <option value="national_id">National ID / Passport</option>
@@ -187,9 +214,20 @@ export function ContactForm() {
         <div className="flex items-center justify-end">
           <button
             type="submit"
-            className="bg-[#b91c1c] hover:bg-brand-red-600 text-white font-semibold px-8 py-3 rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer ml-auto"
+            disabled={isSubmitting}
+            className="bg-brand-red-500 hover:bg-brand-red-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-lg shadow-xs flex items-center gap-2 transition-all cursor-pointer ml-auto"
           >
-            Schedule Pickup ▷
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span>Processing…</span>
+              </>
+            ) : (
+              <span>Schedule Pickup ▷</span>
+            )}
           </button>
         </div>
       </form>

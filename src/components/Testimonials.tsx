@@ -35,7 +35,7 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-export default function Fleet() {
+export default function Testimonials() {
   return (
     <section id="operations" className="bg-slate-50 py-16 md:py-24 border-t border-slate-100">
       {/* Both header & grid sit inside this single max-w container */}
