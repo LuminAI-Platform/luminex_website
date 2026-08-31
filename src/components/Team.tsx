@@ -28,7 +28,7 @@ const LEADERS: TeamMember[] = [
   {
     name: "Ewurasi Graham",
     role: "Chief Financial Officer",
-    bio: "Oversees corporate fiscal strategy, institutional risk management, financial governance, and consolidated enterprise billing systems.",
+    bio: "Oversees corporate fiscal strategy, enterprise valuation governance ($5M–$7M pipeline portfolio), institutional risk management, and consolidated billing systems.",
     image: "/team/ewurasi-graham.jpg",
   },
   {
@@ -46,7 +46,7 @@ const LEADERS: TeamMember[] = [
   {
     name: "Virtus Dakura",
     role: "Senior Engineer",
-    bio: "Architects real-time GPS telemetry infrastructure, cryptographic CSN tracking engines, and digital proof-of-delivery verification platforms.",
+    bio: "Full-stack software engineer architecting high-performance digital platforms, scalable cloud infrastructure, and secure real-time tracking systems powering Luminex.",
     image: "/team/virtus-dakura.jpg",
   },
   {
