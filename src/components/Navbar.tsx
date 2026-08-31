@@ -4,13 +4,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Truck } from "lucide-react";
 
 const NAV_LINKS = [
   { name: "Home", href: "/" },
-  { name: "Track Documents", href: "/track" },
   { name: "Services", href: "/#services" },
-  { name: "About Us", href: "/about" },
-  { name: "FAQ", href: "/faq" },
+  { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -167,8 +166,19 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/track"
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded font-bold text-sm border transition-colors ${
+              pathname === "/track"
+                ? "border-brand-red-600 text-brand-red-600 bg-brand-red-50"
+                : "border-slate-300 text-slate-700 hover:border-navy-900 hover:text-navy-900"
+            }`}
+          >
+            <Truck className="w-4 h-4" />
+            Track
+          </Link>
           <Link
             href="/book"
             className={`px-4 py-2 rounded font-bold text-white transition-colors ${
@@ -235,15 +245,25 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/book"
-            onClick={() => setIsOpen(false)}
-            className="block text-center bg-slate-900 text-white py-2 rounded font-bold hover:bg-brand-red-600 transition-colors"
-          >
-            Book Courier
-          </Link>
+          <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+            <Link
+              href="/track"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 border border-slate-300 text-slate-700 py-2 rounded font-bold hover:border-navy-900 hover:text-navy-900 transition-colors"
+            >
+              <Truck className="w-4 h-4" />
+              Track Document
+            </Link>
+            <Link
+              href="/book"
+              onClick={() => setIsOpen(false)}
+              className="block text-center bg-slate-900 text-white py-2 rounded font-bold hover:bg-brand-red-600 transition-colors"
+            >
+              Book Courier
+            </Link>
+          </div>
         </div>
       )}
     </header>
   );
-}
+}
