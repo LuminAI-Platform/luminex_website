@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { MessageSquare, Send, Lock } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { MessageSquare, Send, Lock, Loader2, AlertCircle } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -35,24 +35,63 @@ const INPUT_CLASS =
 // ── Component ────────────────────────────────────────────────────────
 
 /**
- * Contact page inquiry form.
- *
- * Collects visitor details, inquiry subject, and message.
- * Displays a success state with reset option after submission.
+ * Contact page inquiry form with built-in multi-tier spam protection:
+ * - Invisible honeypot trap to catch automated web crawlers/bots
+ * - Client mount timestamp heuristic to prevent rapid-fire automated scripts
+ * - Live connection to `/api/contact` endpoint with error & loading states
  */
 export default function ContactInquiryForm() {
   const [formData, setFormData] = useState<InquiryFormData>(INITIAL_FORM_DATA);
+  const [honeypot, setHoneypot] = useState("");
+  const renderedAtRef = useRef<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    renderedAtRef.current = Date.now();
+  }, []);
 
   /** Update a single form field by key. */
   const updateField = (key: keyof InquiryFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  /** Handle form submission. */
-  const handleSubmit = (e: React.FormEvent) => {
+  /** Handle form submission with anti-spam payload. */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          honeypot,
+          renderedAt: renderedAtRef.current,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit inquiry. Please try again.");
+      }
+
+      setSubmitted(true);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("An unexpected error occurred. Please contact dispatch via phone.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ── Success State ──────────────────────────────────────────────────
@@ -73,6 +112,7 @@ export default function ContactInquiryForm() {
           onClick={() => {
             setSubmitted(false);
             setFormData(INITIAL_FORM_DATA);
+            renderedAtRef.current = Date.now();
           }}
           className="mt-6 text-xs text-brand-red-500 font-bold uppercase tracking-wider underline cursor-pointer hover:text-brand-red-600 transition-colors"
         >
@@ -90,6 +130,29 @@ export default function ContactInquiryForm() {
           <MessageSquare className="w-5 h-5 text-brand-red-500 shrink-0" />
           Dispatch Inquiry Form
         </h2>
+
+        {errorMessage && (
+          <div className="p-3.5 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2.5 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* ── Invisible Honeypot Trap for Bot Detection ────────────────── */}
+        <div
+          className="opacity-0 absolute -z-50 pointer-events-none w-0 h-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <label htmlFor="company_fax_hp">Leave this field empty</label>
+          <input
+            id="company_fax_hp"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           <div>
@@ -178,9 +241,17 @@ export default function ContactInquiryForm() {
 
         <button
           type="submit"
-          className="bg-brand-red-500 hover:bg-brand-red-600 text-white font-semibold px-6 sm:px-8 py-3 rounded-lg shadow-xs transition-all duration-200 cursor-pointer w-full md:w-auto focus-visible:ring-2 focus-visible:ring-brand-red-500 focus-visible:ring-offset-2"
+          disabled={isSubmitting}
+          className="bg-brand-red-500 hover:bg-brand-red-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 sm:px-8 py-3 rounded-lg shadow-xs transition-all duration-200 cursor-pointer w-full md:w-auto focus-visible:ring-2 focus-visible:ring-brand-red-500 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
         >
-          Submit Inquiry
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Submitting Inquiry…</span>
+            </>
+          ) : (
+            <span>Submit Inquiry</span>
+          )}
         </button>
       </form>
     </div>
