@@ -1,88 +1,122 @@
 import React from "react";
 import Link from "next/link";
+import { Share2, Globe } from "lucide-react";
 
+// ── Data ─────────────────────────────────────────────────────────────
+
+const QUICK_LINKS = [
+  { label: "About Us", href: "/about" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Contact Us", href: "/contact" },
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+] as const;
+
+const SOCIAL_LINKS = [
+  {
+    label: "Share",
+    href: "#",
+    icon: Share2,
+  },
+  {
+    label: "X (Twitter)",
+    href: "#",
+    icon: () => (
+      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Website",
+    href: "#",
+    icon: Globe,
+  },
+] as const;
+
+// ── Component ────────────────────────────────────────────────────────
+
+/**
+ * Site-wide footer.
+ *
+ * 4-column layout: Brand, Contact Info, Quick Links, Social.
+ * Responsive grid: 1-col → 2-col (sm) → 4-col (lg).
+ */
 export default function Footer() {
   return (
     <footer className="w-full bg-navy-950 text-white text-sm py-10 md:py-12 border-t border-navy-900">
-      {/* Matches container width max-w-6xl (or max-w-7xl) */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
-          {/* Column 1 – Brand & Legal */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-start">
+          {/* Column 1 — Brand & Legal */}
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-white text-base">
               Luminex Logistics
             </h3>
-            <p className="text-slate-400 text-xs">
-              © 2026 Luminex Logistics Ltd.
+            <p className="text-slate-400 text-xs leading-relaxed">
+              Ghana&apos;s premier secure document delivery network. Licensed
+              courier operator since 2020.
+            </p>
+            <p className="text-slate-500 text-xs mt-1">
+              © {new Date().getFullYear()} Luminex Logistics Ltd.
             </p>
           </div>
 
-          {/* Column 2 – Contact Info */}
+          {/* Column 2 — Contact Info */}
           <div className="flex flex-col gap-2">
-            <p className="text-slate-300">
-              <span className="font-semibold text-white">
-                Accra Head Office:
-              </span>
-              <br />
+            <h4 className="font-bold text-white uppercase text-xs tracking-wider mb-1">
+              Head Office
+            </h4>
+            <p className="text-slate-300 text-xs leading-relaxed">
               H302 Sowah Larbi Ave
+              <br />
+              Accra, Ghana
             </p>
-            <p className="text-slate-300">
-              <span className="font-semibold text-white">Support:</span> +233 (0) 30 290 8471
+            <p className="text-slate-300 text-xs">
+              <span className="font-semibold text-white">Support:</span>{" "}
+              <a
+                href="tel:+233302908471"
+                className="hover:text-white transition-colors"
+              >
+                +233 (0) 30 290 8471
+              </a>
             </p>
           </div>
 
-          {/* Column 3 – Quick Links */}
-          <div className="flex flex-col gap-2">
-            {[
-              { label: "About Us", href: "/about" },
-              { label: "FAQ", href: "/faq" },
-              { label: "Contact Us", href: "/contact" },
-              { label: "Terms of Service", href: "/terms" },
-              { label: "Privacy Policy", href: "/privacy" },
-            ].map((link) => (
+          {/* Column 3 — Quick Links */}
+          <div className="flex flex-col gap-1.5">
+            <h4 className="font-bold text-white uppercase text-xs tracking-wider mb-1">
+              Quick Links
+            </h4>
+            {QUICK_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-slate-400 hover:text-white transition-colors w-fit text-xs"
+                className="text-slate-400 hover:text-white transition-colors duration-200 w-fit text-xs py-0.5"
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Column 4 – Social / Connect */}
+          {/* Column 4 — Social / Connect */}
           <div className="flex flex-col gap-3">
             <h4 className="font-bold text-white uppercase text-xs tracking-wider">
-              CONNECT WITH US
+              Connect With Us
             </h4>
-            <div className="flex items-center gap-4 text-slate-300">
-              <a
-                href="#"
-                aria-label="Share"
-                className="hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                aria-label="X (Twitter)"
-                className="hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-              <a
-                href="#"
-                aria-label="Globe"
-                className="hover:text-white transition-colors"
-              >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                </svg>
-              </a>
+            <div className="flex items-center gap-3 text-slate-400">
+              {SOCIAL_LINKS.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={social.label}
+                    className="w-9 h-9 rounded-lg bg-navy-900 hover:bg-brand-red-500 flex items-center justify-center text-slate-300 hover:text-white transition-all duration-200"
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>

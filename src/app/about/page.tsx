@@ -29,24 +29,28 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Section 2: Key Operational Stats */}
+      {/* Section 2: Key Operational & Financial Stats */}
       <section className="bg-white py-12 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 text-center">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 col-span-2 sm:col-span-1">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">$5M–$7M</div>
+              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Estimated Pipeline Valuation</div>
+            </div>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-3xl md:text-4xl font-black text-brand-red-500 mb-1">10,000+</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">10,000+</div>
               <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Documents Delivered Annually</div>
             </div>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-3xl md:text-4xl font-black text-brand-red-500 mb-1">99.9%</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">99.9%</div>
               <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">On-Time Fulfillment Rate</div>
             </div>
             <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-3xl md:text-4xl font-black text-brand-red-500 mb-1">50+</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">50+</div>
               <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Corporate & Legal Partners</div>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-3xl md:text-4xl font-black text-brand-red-500 mb-1">3</div>
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 col-span-2 sm:col-span-1">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">3</div>
               <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Regional Custody Hubs</div>
             </div>
           </div>
@@ -59,19 +63,19 @@ export default function AboutPage() {
           <div className="flex items-center gap-3 mb-3">
             <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
             <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-              Engineered for Integrity
+              Engineered for Integrity & Scale
             </h2>
           </div>
           <p className="text-slate-500 max-w-2xl pl-4 text-base leading-relaxed">
-            Founded to eliminate chain-of-custody risks in high-value document transit across West Africa.
+            Founded to eliminate chain-of-custody risks in high-value document transit across West Africa with solid institutional backing.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-slate-600 leading-relaxed">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-600 leading-relaxed">
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-3">
             <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-brand-red-500" />
-              Our Corporate Mission
+              Corporate Mission
             </h3>
             <p>
               Luminex Logistics operates under strict ISO-compliant security standards. We guarantee tamper-evident physical transport, real-time GPS telemetry, and legal proof-of-delivery signatures for confidential corporate assets.
@@ -85,6 +89,16 @@ export default function AboutPage() {
             </h3>
             <p>
               Every consignment receives an encrypted Consignment Security Number (CSN) at intake. From physical vault sorting to doorstep ID verification via Ghana Card or Passport, our protocols maintain total audit readiness.
+            </p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-3">
+            <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
+              <Award className="w-5 h-5 text-brand-red-500" />
+              Market Valuation & Growth
+            </h3>
+            <p>
+              With expanding long-term institutional pipelines across legal, banking, and government sectors, Luminex Logistics operates with an estimated enterprise valuation of <strong>$5M–$7M</strong>, reflecting deep market trust and scalable operational assets.
             </p>
           </div>
         </div>

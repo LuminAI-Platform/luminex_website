@@ -1,31 +1,68 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Truck } from "lucide-react";
 
+/**
+ * Navigation link configuration.
+ * Each entry maps a display name to a route or hash anchor.
+ */
 const NAV_LINKS = [
   { name: "Home", href: "/" },
-  { name: "Track Documents", href: "/track" },
   { name: "Services", href: "/#services" },
-  { name: "About Us", href: "/about" },
-  { name: "FAQ", href: "/faq" },
+  { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
-];
+] as const;
 
+/**
+ * Primary site navigation bar.
+ *
+ * Features:
+ * - Sticky header with scroll-aware active states
+ * - Scroll spy for homepage anchor sections (IntersectionObserver)
+ * - Animated mobile drawer with body scroll lock (visible below `lg` breakpoint)
+ * - Dual CTA buttons: "Track" (outlined) and "Book Courier" (filled)
+ */
 export default function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
-  const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
-  if (pathname !== "/" && activeHash !== "") {
-    setActiveHash("");
+  // ── Close drawer & reset hash on route change (render-time adjustment) ─
+  // React-recommended pattern: adjust state when props change during render
+  // instead of useEffect, avoiding cascading render cycles.
+  // See: https://react.dev/learn/you-might-not-need-an-effect#adjusting-state-when-a-prop-changes
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setIsOpen(false);
+    if (pathname !== "/") {
+      setActiveHash("");
+    }
   }
 
+  // ── Body scroll lock when mobile drawer is open ────────────────────
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // ── Scroll spy for homepage sections ───────────────────────────────
   useEffect(() => {
     if (pathname !== "/") return;
 
+    // Sync hash from URL on initial load
     if (typeof window !== "undefined" && window.location.hash) {
       const initialHash = window.location.hash;
       requestAnimationFrame(() => {
@@ -40,8 +77,8 @@ export default function Navbar() {
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("popstate", handleHashChange);
 
-    // Scroll spy for homepage sections
-    const sectionIds = ["services", "operations", "team"];
+    // Observe visible homepage sections
+    const sectionIds = ["services"];
     const sectionElements = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
@@ -57,16 +94,16 @@ export default function Navbar() {
         });
       };
 
-      const observerOptions: IntersectionObserverInit = {
+      observer = new IntersectionObserver(observerCallback, {
         root: null,
         rootMargin: "-20% 0px -50% 0px",
         threshold: 0,
-      };
+      });
 
-      observer = new IntersectionObserver(observerCallback, observerOptions);
       sectionElements.forEach((el) => observer?.observe(el));
     }
 
+    // Reset active hash when scrolled to very top
     const handleScroll = () => {
       if (window.scrollY < 100) {
         setActiveHash("");
@@ -83,6 +120,7 @@ export default function Navbar() {
     };
   }, [pathname]);
 
+  /** Determine if a nav link matches the current route or hash anchor. */
   const checkIsActive = useCallback(
     (href: string) => {
       if (href.startsWith("/#")) {
@@ -97,6 +135,7 @@ export default function Navbar() {
     [pathname, activeHash]
   );
 
+  /** Handle smooth-scroll for hash links and scroll-to-top for Home. */
   const handleLinkClick = (href: string) => {
     if (href.startsWith("/#")) {
       const targetHash = href.replace("/", "");
@@ -117,45 +156,44 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 py-4 shadow-xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 py-3 sm:py-4 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Brand Logo */}
+        {/* ── Brand Logo ──────────────────────────────────────────── */}
         <Link
           href="/"
           onClick={() => handleLinkClick("/")}
-          className="flex items-center gap-3"
+          className="flex items-center gap-2.5 shrink-0"
         >
-          <div className="relative w-12 h-12 rounded overflow-hidden">
+          <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded overflow-hidden">
             <Image
               src="/logo.jpeg"
               alt="Luminex Logistics Logo"
               fill
-              sizes="48px"
+              sizes="(max-width: 640px) 40px, 48px"
               className="object-cover"
               priority
             />
           </div>
           <div>
-            <span className="text-lg font-black text-slate-900 tracking-tight block uppercase">
+            <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight block uppercase leading-none">
               Luminex
             </span>
-            <span className="text-xs font-bold text-brand-red-600 tracking-wider block -mt-1">
+            <span className="text-[10px] sm:text-xs font-bold text-brand-red-600 tracking-wider block">
               Logistics
             </span>
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
+        {/* ── Desktop Navigation (visible at lg+) ─────────────────── */}
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8 font-medium text-sm text-slate-700">
           {NAV_LINKS.map((link) => {
             const isActive = checkIsActive(link.href);
-
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => handleLinkClick(link.href)}
-                className={`py-1 transition-colors border-b-2 ${
+                className={`py-1 transition-colors duration-200 border-b-2 ${
                   isActive
                     ? "text-brand-red-600 font-semibold border-brand-red-600"
                     : "border-transparent hover:text-brand-red-600"
@@ -167,11 +205,22 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:block">
+        {/* ── Desktop CTAs (visible at lg+) ────────────────────────── */}
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            href="/track"
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded font-bold text-sm border transition-colors duration-200 ${
+              pathname === "/track"
+                ? "border-brand-red-600 text-brand-red-600 bg-brand-red-50"
+                : "border-slate-300 text-slate-700 hover:border-navy-900 hover:text-navy-900"
+            }`}
+          >
+            <Truck className="w-4 h-4" />
+            Track
+          </Link>
           <Link
             href="/book"
-            className={`px-4 py-2 rounded font-bold text-white transition-colors ${
+            className={`px-4 py-2 rounded font-bold text-sm text-white transition-colors duration-200 ${
               pathname === "/book"
                 ? "bg-brand-red-600"
                 : "bg-slate-900 hover:bg-brand-red-600"
@@ -181,15 +230,15 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile Toggle */}
+        {/* ── Mobile Toggle (visible below lg) ─────────────────────── */}
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="md:hidden p-2 border border-slate-200 rounded text-slate-600 focus:outline-none"
+          className="lg:hidden p-2 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-navy-900"
           aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={isOpen}
         >
           <svg
-            className="w-6 h-6"
+            className="w-5 h-5 sm:w-6 sm:h-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -213,12 +262,17 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Drawer */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 p-4 space-y-3 font-semibold text-slate-700">
+      {/* ── Mobile Drawer (animated slide-down) ──────────────────── */}
+      <div
+        ref={drawerRef}
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+        aria-hidden={!isOpen}
+      >
+        <div className="bg-white border-t border-slate-100 px-4 sm:px-6 pt-4 pb-5 space-y-1">
           {NAV_LINKS.map((link) => {
             const isActive = checkIsActive(link.href);
-
             return (
               <Link
                 key={link.href}
@@ -227,23 +281,37 @@ export default function Navbar() {
                   handleLinkClick(link.href);
                   setIsOpen(false);
                 }}
-                className={`block hover:text-brand-red-600 ${
-                  isActive ? "text-brand-red-600 font-bold" : ""
+                className={`block py-2.5 px-3 rounded-lg font-semibold text-sm transition-colors duration-150 ${
+                  isActive
+                    ? "text-brand-red-600 bg-brand-red-50"
+                    : "text-slate-700 hover:text-brand-red-600 hover:bg-slate-50"
                 }`}
               >
                 {link.name}
               </Link>
             );
           })}
-          <Link
-            href="/book"
-            onClick={() => setIsOpen(false)}
-            className="block text-center bg-slate-900 text-white py-2 rounded font-bold hover:bg-brand-red-600 transition-colors"
-          >
-            Book Courier
-          </Link>
+
+          {/* Mobile CTAs */}
+          <div className="flex flex-col gap-2.5 pt-3 mt-2 border-t border-slate-100">
+            <Link
+              href="/track"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 border border-slate-300 text-slate-700 py-2.5 rounded-lg font-bold text-sm hover:border-navy-900 hover:text-navy-900 transition-colors duration-200"
+            >
+              <Truck className="w-4 h-4" />
+              Track Document
+            </Link>
+            <Link
+              href="/book"
+              onClick={() => setIsOpen(false)}
+              className="block text-center bg-slate-900 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-brand-red-600 transition-colors duration-200"
+            >
+              Book Courier
+            </Link>
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
