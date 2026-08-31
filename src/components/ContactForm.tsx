@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { MapPin, Truck, FileText, Lock } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { MapPin, Truck, FileText, Lock, Loader2, AlertCircle } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -48,34 +48,67 @@ const INPUT_CLASS =
  * Courier booking / schedule delivery form.
  *
  * Three-section form (Sender → Recipient → Manifest) with
- * client-side validation and simulated CSN generation on submit.
+ * server-side validation, database persistence, anti-spam heuristics,
+ * and live CSN generation.
  */
 export function ContactForm() {
   const [formData, setFormData] = useState<BookingFormData>(INITIAL_FORM_DATA);
+  const [honeypot, setHoneypot] = useState("");
+  const renderedAtRef = useRef<number | null>(null);
   const [generatedCSN, setGeneratedCSN] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    renderedAtRef.current = Date.now();
+  }, []);
 
   /** Update a single form field by key. */
   const updateField = (key: keyof BookingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  /** Handle form submission — simulates API call and generates CSN. */
+  /** Handle form submission with live backend Route Handler. */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
-      // Simulate network request delay (replace with real API call)
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      const randomCSN = `LMX-GRA-${Math.floor(1000 + Math.random() * 9000)}`;
-      setGeneratedCSN(randomCSN);
-    } catch {
-      // Future: handle API errors with user-facing feedback
-      console.error("Booking submission failed");
+      const response = await fetch("/api/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          honeypot,
+          renderedAt: renderedAtRef.current,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to submit booking. Please try again.");
+      }
+
+      setGeneratedCSN(data.csn);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("An unexpected network error occurred. Please contact dispatch via telephone.");
+      }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleModalClose = () => {
+    setGeneratedCSN(null);
+    setFormData(INITIAL_FORM_DATA);
+    renderedAtRef.current = Date.now();
   };
 
   return (
@@ -84,6 +117,32 @@ export function ContactForm() {
         onSubmit={handleSubmit}
         className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 md:p-10 shadow-xs space-y-8"
       >
+        {errorMessage && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-sm text-red-700">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold">Submission Error</p>
+              <p className="text-xs text-red-600 mt-0.5">{errorMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Invisible Honeypot Field ─────────────────────────── */}
+        <div
+          className="opacity-0 absolute -z-50 pointer-events-none w-0 h-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <label htmlFor="company_booking_fax">Leave this field empty</label>
+          <input
+            id="company_booking_fax"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
+
         {/* ── Section 1: Sender Details ─────────────────────────── */}
         <div>
           <h2 className="text-xl font-bold text-navy-900 flex items-center gap-2 border-b border-slate-100 pb-3 mb-6">
@@ -286,27 +345,8 @@ export function ContactForm() {
           >
             {isSubmitting ? (
               <>
-                <svg
-                  className="animate-spin w-4 h-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                <span>Processing…</span>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Scheduling Pickup…</span>
               </>
             ) : (
               <span>Schedule Pickup ▷</span>
@@ -333,7 +373,7 @@ export function ContactForm() {
               {generatedCSN}
             </div>
             <button
-              onClick={() => setGeneratedCSN(null)}
+              onClick={handleModalClose}
               className="w-full bg-navy-900 hover:bg-navy-800 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors duration-200 cursor-pointer focus-visible:ring-2 focus-visible:ring-navy-900 focus-visible:ring-offset-2"
             >
               Close Confirmation
