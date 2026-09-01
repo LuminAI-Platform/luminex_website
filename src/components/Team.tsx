@@ -17,13 +17,13 @@ const LEADERS: TeamMember[] = [
     name: "Josiah Otoo-Mensah",
     role: "Chief Executive Officer",
     bio: "Visionary leader driving institutional logistics transformation across Ghana, specializing in chain-of-custody protocols for diplomatic and high-value document transit.",
-    image: "/team/josiah-otoo-mensah.jpg",
+    image: "/team/josiah.jpg",
   },
   {
     name: "Blessing Lamptey",
     role: "Chief Operating Officer",
     bio: "Directs day-to-day national dispatch operations, armored courier fleet deployment, and SLA fulfillment across all regional custody distribution hubs.",
-    image: "/team/blessing-lamptey.jpg",
+    image: "/team/blessing.jpg",
   },
   {
     name: "Ewurasi Graham",
@@ -35,25 +35,25 @@ const LEADERS: TeamMember[] = [
     name: "Michael Gyamfi",
     role: "Head of Customer Relations",
     bio: "Leads institutional partner onboarding, corporate account governance, and VIP support for Ghana's foremost legal and financial entities.",
-    image: "/team/michael-gyamfi.jpg",
+    image: "/team/michael.jpg",
   },
   {
     name: "Peter Ampah",
     role: "Fleet Manager",
     bio: "Manages secure transport vehicles, telemetry tracking systems, preventive maintenance regimens, and optimized dispatch routes in Accra.",
-    image: "/team/peter-ampah.jpg",
+    image: "/team/peter.jpg",
   },
   {
     name: "Virtus Dakura",
     role: "Senior Engineer",
     bio: "Full-stack software engineer architecting high-performance digital platforms, scalable cloud infrastructure, and secure real-time tracking systems powering Luminex.",
-    image: "/team/virtus-dakura.jpg",
+    image: "/team/virtus.jpg",
   },
   {
     name: "Anne A. R Britwum, Esq.",
     role: "External Legal Counsel",
     bio: "Advises on statutory logistics compliance, custody transit liabilities, Data Protection Act (Act 843) adherence, and corporate contract frameworks.",
-    image: "/team/anne-britwum.jpg",
+    image: "/team/anne.jpg",
   },
 ];
 
