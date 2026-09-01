@@ -47,7 +47,7 @@ const LEADERS: TeamMember[] = [
     name: "Virtus Dakura",
     role: "Senior Engineer",
     bio: "Full-stack software engineer architecting high-performance digital platforms, scalable cloud infrastructure, and secure real-time tracking systems powering Luminex.",
-    image: "/team/virtus.jpg",
+    image: "/team/virtus.png",
   },
   {
     name: "Anne A. R Britwum, Esq.",
