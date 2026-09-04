@@ -50,7 +50,7 @@ const LEADERS: TeamMember[] = [
     image: "/team/virtus.png",
   },
   {
-    name: "Anne A. R Britwum, Esq.",
+    name: "Anne A. Britwum, Esq.",
     role: "External Legal Counsel",
     bio: "Advises on statutory logistics compliance, custody transit liabilities, Data Protection Act (Act 843) adherence, and corporate contract frameworks.",
     image: "/team/anne.jpg",
