@@ -19,19 +19,24 @@ const FAQ_DATA: FAQCategory[] = [
     title: "Booking & Manifests",
     items: [
       {
+        question: "How do I book a courier delivery?",
+        answer:
+          "All new bookings are conducted via WhatsApp on +233 54 597 5896 with our Head of Operations, or via our online booking form. He coordinates directly with our Fleet Manager to schedule your pickup, confirm the manifest, and arrange delivery.",
+      },
+      {
+        question: "Do I need to create an account to book a delivery?",
+        answer:
+          "No account is needed at this time. We only require your full name, delivery address, phone number, and the ID type you will present to verify your legitimacy. Individual and corporate user accounts will be introduced in a future phase.",
+      },
+      {
         question: "How far in advance must I schedule a courier?",
         answer:
-          "Same-day dispatch requests must be logged before 12:00 GMT. Enterprise account holders receive guaranteed pickup within 45 minutes of request confirmation.",
+          "Same-day dispatch requests should ideally be logged before 12:00 GMT. Enterprise clients and priority dispatches receive rapid response coordination directly from our Head of Operations.",
       },
       {
         question: "What document types can be securely transported?",
         answer:
-          "We handle confidential legal contracts, bank instruments, land title deeds, audited financial records, court filings, and high-value physical certificates requiring tamper protection.",
-      },
-      {
-        question: "Can I modify delivery details after booking confirmation?",
-        answer:
-          "Destination addresses and receiver contact numbers can be re-routed via your corporate dashboard or dispatch desk up until the consignment reaches 'Vault Sorting' status.",
+          "We handle confidential legal contracts, bank instruments, land title deeds, audited financial records, court filings, and high-value physical certificates requiring tamper-evident protection.",
       },
     ],
   },
@@ -41,17 +46,17 @@ const FAQ_DATA: FAQCategory[] = [
       {
         question: "What is a CSN (Consignment Security Number)?",
         answer:
-          "A CSN is a unique encrypted alphanumeric identifier (e.g. CSN-8829-GH) assigned to every item upon intake, locking it to its electronic chain-of-custody log.",
+          "A CSN is a unique encrypted alphanumeric identifier (e.g. LMX-GRA-8829) assigned to every item upon intake, locking it to its electronic chain-of-custody log for real-time tracking.",
       },
       {
         question: "How often is GPS telemetry updated during transit?",
         answer:
-          "GPS telemetry and courier status coordinates update every 60 seconds on the live tracking dashboard while the courier unit is in transit.",
+          "GPS telemetry and courier status coordinates update continuously on the live tracking dashboard while the courier unit is in transit.",
       },
       {
         question: "What does 'Sorting Vault Transit' mean in the tracking log?",
         answer:
-          "This status indicates that the item is stored inside our climate-controlled, biometric-secured hub vault awaiting next-morning specialized dispatch.",
+          "This status indicates that the item is stored inside our climate-controlled, biometric-secured hub vault awaiting specialized dispatch or delivery window execution.",
       },
     ],
   },
@@ -61,12 +66,12 @@ const FAQ_DATA: FAQCategory[] = [
       {
         question: "What forms of identification are accepted at delivery?",
         answer:
-          "Receivers must present a valid Ghana Card, Passport, or Driver's License matching the named recipient on the consignment manifest.",
+          "To verify legitimacy, receivers must present a valid Ghana Card, Passport, or Driver's License matching the named recipient or authorized individual on the consignment manifest.",
       },
       {
         question: "What happens if the named receiver is unavailable at destination?",
         answer:
-          "The courier will not release the item to third parties without prior written authorization. The item returns to the central vault while dispatch contacts the sender.",
+          "The courier will not release the item to unauthorized third parties. The consignment is secured while our dispatch desk contacts the sender to agree on next steps.",
       },
       {
         question: "Are digital signatures and handover logs legally admissible?",
@@ -76,17 +81,22 @@ const FAQ_DATA: FAQCategory[] = [
     ],
   },
   {
-    title: "Enterprise & Billing",
+    title: "Payment, Customer Support & Refunds",
     items: [
       {
-        question: "Do you offer dedicated corporate portals for law firms and banks?",
+        question: "How and when do I pay for my delivery?",
         answer:
-          "Yes. Enterprise accounts include multi-user management, custom approval chains, automated invoicing, and priority armored pouch dispatch.",
+          "After you submit a delivery request, our Head of Operations contacts you directly to confirm the booking and agree on a payment method based on your convenience (Mobile Money, bank transfer, or cash on collection).",
       },
       {
-        question: "What are your standard payment terms and invoice options?",
+        question: "Who do I contact for customer service issues or refunds?",
         answer:
-          "We support mobile money (MTN MoMo, Telecel Cash), bank wire transfers, and net-30 consolidated monthly invoicing for enterprise clients.",
+          "For customer service inquiries, status escalation, or refund requests, reach our Head of Customer Relations directly on +233 59 646 4461 (call or WhatsApp) or email luminexlogisticsltd@gmail.com.",
+      },
+      {
+        question: "Do you offer corporate invoicing for law firms and institutions?",
+        answer:
+          "Yes. Long-term corporate partners and institutions can arrange consolidated monthly invoicing and dedicated billing accounts.",
       },
     ],
   },

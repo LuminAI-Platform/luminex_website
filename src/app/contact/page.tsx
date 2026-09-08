@@ -40,53 +40,97 @@ export default function ContactPage() {
                 Direct Communication Channels
               </h3>
               <div className="space-y-3">
-                {/* 1. Telephone */}
-                <a
-                  href="tel:+233302908471"
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 group"
-                >
-                  <div className="w-10 h-10 rounded-md bg-brand-red-50 flex items-center justify-center text-brand-red-500 shrink-0 group-hover:scale-105 transition-transform">
-                    <Phone className="w-5 h-5" />
+                {/* 1. New Bookings & Dispatch (Head of Operations) */}
+                <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                      <MessageSquareText className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        All New Bookings
+                      </span>
+                      <h4 className="font-bold text-navy-900 text-sm mt-0.5">
+                        Head of Operations (Bookings & Dispatch)
+                      </h4>
+                      <p className="text-xs text-slate-500 leading-tight mt-0.5">
+                        Coordinates with the Fleet Manager to schedule courier pickups.
+                      </p>
+                      <div className="flex items-center gap-3 mt-2 text-xs font-semibold">
+                        <a
+                          href="https://wa.me/233545975896"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-700 hover:text-emerald-800 underline flex items-center gap-1"
+                        >
+                          WhatsApp: +233 54 597 5896
+                        </a>
+                        <span className="text-slate-300">|</span>
+                        <a
+                          href="tel:+233545975896"
+                          className="text-navy-900 hover:underline"
+                        >
+                          Call
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-navy-900 text-sm">Telephone Support Line</h4>
-                    <p className="text-xs text-slate-500 font-mono">+233 (0) 30 290 8471</p>
-                  </div>
-                </a>
+                </div>
 
-                {/* 2. Direct Email */}
+                {/* 2. Customer Relations & Refunds */}
+                <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-md bg-brand-red-50 flex items-center justify-center text-brand-red-500 shrink-0">
+                      <Phone className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-[10px] font-bold text-navy-900 bg-slate-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Support & Refunds
+                      </span>
+                      <h4 className="font-bold text-navy-900 text-sm mt-0.5">
+                        Head of Customer Relations
+                      </h4>
+                      <p className="text-xs text-slate-500 leading-tight mt-0.5">
+                        For customer service, invoice assistance, and refund requests.
+                      </p>
+                      <div className="flex items-center gap-3 mt-2 text-xs font-semibold">
+                        <a
+                          href="tel:+233596464461"
+                          className="text-navy-900 hover:text-brand-red-600 underline"
+                        >
+                          Tel: +233 59 646 4461
+                        </a>
+                        <span className="text-slate-300">|</span>
+                        <a
+                          href="https://wa.me/233596464461"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-700 hover:underline"
+                        >
+                          WhatsApp
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Direct Email */}
                 <a
-                  href="mailto:ops@luminexlogistics.com"
+                  href="mailto:luminexlogisticsltd@gmail.com"
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 group"
                 >
                   <div className="w-10 h-10 rounded-md bg-brand-red-50 flex items-center justify-center text-brand-red-500 shrink-0 group-hover:scale-105 transition-transform">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-navy-900 text-sm">Direct Operations Email</h4>
-                    <p className="text-xs text-slate-500 font-mono">ops@luminexlogistics.com</p>
-                  </div>
-                </a>
-
-                {/* 3. WhatsApp Direct */}
-                <a
-                  href="https://wa.me/233302908471"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 group"
-                >
-                  <div className="w-10 h-10 rounded-md bg-brand-red-50 flex items-center justify-center text-brand-red-500 shrink-0 group-hover:scale-105 transition-transform">
-                    <MessageSquareText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-navy-900 text-sm">WhatsApp Direct Dispatch</h4>
-                    <p className="text-xs text-slate-500">Instant chat dispatch desk</p>
+                    <h4 className="font-bold text-navy-900 text-sm">Official Corporate Email</h4>
+                    <p className="text-xs text-slate-500 font-mono">luminexlogisticsltd@gmail.com</p>
                   </div>
                 </a>
 
                 {/* 4. Accra Headquarters */}
                 <div className="flex items-start gap-3 p-3">
-                  <div className="w-10 h-10 rounded-md bg-brand-red-50 flex items-center justify-center text-brand-red-500 shrink-0">
+                  <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>

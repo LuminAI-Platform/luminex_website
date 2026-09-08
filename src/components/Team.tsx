@@ -21,8 +21,8 @@ const LEADERS: TeamMember[] = [
   },
   {
     name: "Blessing Lamptey",
-    role: "Chief Operating Officer",
-    bio: "Directs day-to-day national dispatch operations, armored courier fleet deployment, and SLA fulfillment across all regional custody distribution hubs.",
+    role: "Chief Operating Officer / Head of Operations",
+    bio: "Directs national dispatch operations, coordinates with the fleet manager to schedule courier pickups, and manages direct WhatsApp booking intakes across regional custody hubs.",
     image: "/team/blessing.jpg",
   },
   {
@@ -34,7 +34,7 @@ const LEADERS: TeamMember[] = [
   {
     name: "Michael Gyamfi",
     role: "Head of Customer Relations",
-    bio: "Leads institutional partner onboarding, corporate account governance, and VIP support for Ghana's foremost legal and financial entities.",
+    bio: "Leads client partner onboarding, corporate account governance, VIP customer service resolutions, and refund inquiries for Ghana's foremost entities.",
     image: "/team/michael.jpg",
   },
   {

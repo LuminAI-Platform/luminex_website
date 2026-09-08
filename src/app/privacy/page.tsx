@@ -139,7 +139,7 @@ export default function PrivacyPage() {
             </p>
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 font-mono text-xs text-navy-900 space-y-1">
               <p><strong>Data Protection Officer:</strong> Luminex Logistics Compliance Office</p>
-              <p><strong>Email:</strong> dpo@luminexlogistics.com / ops@luminexlogistics.com</p>
+              <p><strong>Email:</strong> luminexlogisticsltd@gmail.com</p>
               <p><strong>Address:</strong> H302 Sowah Larbi Ave, Accra, Ghana</p>
             </div>
           </section>
