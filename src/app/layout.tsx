@@ -90,8 +90,8 @@ const jsonLd = {
   image: `${SITE_URL}/logo.jpeg`,
   "@id": `${SITE_URL}#organization`,
   url: SITE_URL,
-  telephone: "+233302908471",
-  email: "ops@luminexlogistics.com",
+  telephone: "+233545975896",
+  email: "luminexlogisticsltd@gmail.com",
   address: {
     "@type": "PostalAddress",
     streetAddress: "H302 Sowah Larbi Ave",

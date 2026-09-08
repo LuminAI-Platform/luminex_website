@@ -46,13 +46,13 @@ export default function NotFound() {
 
         <div className="border-t border-slate-100 pt-6 mt-6">
           <p className="text-xs text-slate-400">
-            Need urgent assistance? Contact our dispatch desk at{" "}
+            Need urgent assistance? Contact customer support at{" "}
             <a
-              href="tel:+233302908471"
+              href="tel:+233596464461"
               className="text-brand-red-600 font-semibold hover:underline inline-flex items-center gap-1"
             >
               <Phone className="w-3 h-3 inline" />
-              +233 (0) 30 290 8471
+              +233 59 646 4461
             </a>
           </p>
         </div>

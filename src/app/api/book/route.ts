@@ -73,60 +73,50 @@ export async function POST(request: Request) {
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!senderEmail || !emailRegex.test(senderEmail.trim())) {
-      return NextResponse.json(
-        { error: "A valid sender email address is required." },
-        { status: 400 }
-      );
+    if (senderEmail && senderEmail.trim().length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(senderEmail.trim())) {
+        return NextResponse.json(
+          { error: "Please enter a valid email address." },
+          { status: 400 }
+        );
+      }
     }
 
     if (!senderContact || senderContact.trim().length < 7) {
       return NextResponse.json(
-        { error: "A valid sender contact phone number is required." },
+        { error: "A valid contact phone number is required." },
         { status: 400 }
       );
     }
 
     if (!collectionAddress || collectionAddress.trim().length < 3) {
       return NextResponse.json(
-        { error: "Collection digital address or GPS location is required." },
+        { error: "Delivery or collection address is required." },
         { status: 400 }
       );
     }
 
-    if (!receiverName || receiverName.trim().length < 2) {
-      return NextResponse.json(
-        { error: "Authorized receiver legal name is required." },
-        { status: 400 }
-      );
-    }
+    const resolvedReceiverName = (receiverName && receiverName.trim().length >= 2)
+      ? receiverName.trim()
+      : senderName.trim();
 
-    if (!receiverContact || receiverContact.trim().length < 7) {
-      return NextResponse.json(
-        { error: "A valid receiver contact number is required." },
-        { status: 400 }
-      );
-    }
+    const resolvedReceiverContact = (receiverContact && receiverContact.trim().length >= 7)
+      ? receiverContact.trim()
+      : senderContact.trim();
 
-    if (!destinationAddress || destinationAddress.trim().length < 3) {
-      return NextResponse.json(
-        { error: "Destination facility or residential address is required." },
-        { status: 400 }
-      );
-    }
+    const resolvedDestinationAddress = (destinationAddress && destinationAddress.trim().length >= 3)
+      ? destinationAddress.trim()
+      : collectionAddress.trim();
 
-    if (!description || description.trim().length < 5) {
-      return NextResponse.json(
-        { error: "Document or item manifest description is required." },
-        { status: 400 }
-      );
-    }
+    const resolvedDescription = (description && description.trim().length >= 2)
+      ? description.trim()
+      : "Standard Courier Consignment";
 
     const validProtocols = ["national_id", "ghana_card", "biometric", "corporate_seal"];
     if (!verificationProtocol || !validProtocols.includes(verificationProtocol)) {
       return NextResponse.json(
-        { error: "A valid doorstep verification protocol must be selected." },
+        { error: "A valid verification ID type must be selected." },
         { status: 400 }
       );
     }
@@ -136,13 +126,13 @@ export async function POST(request: Request) {
     const sanitizedBooking = {
       csn,
       sender_name: senderName.trim().slice(0, 100),
-      sender_email: senderEmail.trim().toLowerCase().slice(0, 150),
+      sender_email: (senderEmail || "customer@direct.luminex").trim().toLowerCase().slice(0, 150),
       sender_contact: senderContact.trim().slice(0, 30),
       collection_address: collectionAddress.trim().slice(0, 255),
-      receiver_name: receiverName.trim().slice(0, 100),
-      receiver_contact: receiverContact.trim().slice(0, 30),
-      destination_address: destinationAddress.trim().slice(0, 255),
-      description: description.trim().slice(0, 500),
+      receiver_name: resolvedReceiverName.slice(0, 100),
+      receiver_contact: resolvedReceiverContact.slice(0, 30),
+      destination_address: resolvedDestinationAddress.slice(0, 255),
+      description: resolvedDescription.slice(0, 500),
       verification_protocol: verificationProtocol,
       status: "PENDING",
     };
@@ -196,7 +186,7 @@ export async function POST(request: Request) {
     // Isolated in try/catch so email failure never blocks successful booking
     const resendApiKey = process.env.RESEND_API_KEY;
     const notificationEmail =
-      process.env.NOTIFICATION_EMAIL_TO || "ops@luminexlogistics.com";
+      process.env.NOTIFICATION_EMAIL_TO || "luminexlogisticsltd@gmail.com";
 
     if (resendApiKey) {
       try {

@@ -24,6 +24,7 @@ const INITIAL_FORM_DATA: InquiryFormData = {
 const SUBJECT_OPTIONS = [
   { value: "Enterprise Account", label: "Enterprise Account / Corporate" },
   { value: "Consignment Query", label: "Consignment Tracking Issue" },
+  { value: "Refund or Billing", label: "Refund or Billing Request" },
   { value: "General Support", label: "General Support" },
 ] as const;
 

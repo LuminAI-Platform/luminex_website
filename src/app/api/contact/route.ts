@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     // the system will forward the notification to the dispatch desk.
     const resendApiKey = process.env.RESEND_API_KEY;
     const notificationRecipient =
-      process.env.NOTIFICATION_EMAIL_TO || "ops@luminexlogistics.com";
+      process.env.NOTIFICATION_EMAIL_TO || "luminexlogisticsltd@gmail.com";
 
     if (resendApiKey) {
       try {

@@ -64,20 +64,38 @@ export default function Footer() {
           {/* Column 2 — Contact Info */}
           <div className="flex flex-col gap-2">
             <h4 className="font-bold text-white uppercase text-xs tracking-wider mb-1">
-              Head Office
+              Contact & Dispatch
             </h4>
             <p className="text-slate-300 text-xs leading-relaxed">
-              H302 Sowah Larbi Ave
-              <br />
-              Accra, Ghana
+              H302 Sowah Larbi Ave, Accra, Ghana
             </p>
             <p className="text-slate-300 text-xs">
-              <span className="font-semibold text-white">Support:</span>{" "}
+              <span className="font-semibold text-white">Bookings:</span>{" "}
               <a
-                href="tel:+233302908471"
+                href="https://wa.me/233545975896"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-white transition-colors"
               >
-                +233 (0) 30 290 8471
+                +233 54 597 5896
+              </a>
+            </p>
+            <p className="text-slate-300 text-xs">
+              <span className="font-semibold text-white">Support & Refunds:</span>{" "}
+              <a
+                href="tel:+233596464461"
+                className="hover:text-white transition-colors"
+              >
+                +233 59 646 4461
+              </a>
+            </p>
+            <p className="text-slate-300 text-xs">
+              <span className="font-semibold text-white">Email:</span>{" "}
+              <a
+                href="mailto:luminexlogisticsltd@gmail.com"
+                className="hover:text-white transition-colors"
+              >
+                luminexlogisticsltd@gmail.com
               </a>
             </p>
           </div>
