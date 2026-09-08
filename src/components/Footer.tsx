@@ -10,6 +10,7 @@ const QUICK_LINKS = [
   { label: "Contact Us", href: "/contact" },
   { label: "Terms of Service", href: "/terms" },
   { label: "Privacy Policy", href: "/privacy" },
+  { label: "Refund Policy", href: "/refund" },
 ] as const;
 
 const SOCIAL_LINKS = [

@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import Link from "next/link";
 import { ShieldCheck, Scale, FileText, AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -118,10 +119,16 @@ export default function TermsPage() {
               6. Cancellations, Re-routing, and Failed Handover Protocol
             </h2>
             <p>
-              Booking cancellations requested prior to courier dispatch incur zero fee. If a courier has arrived at collection, a nominal GHS 50 dispatch charge applies.
+              Booking cancellations requested prior to courier dispatch incur zero fee. If a courier has arrived at collection, an operational dispatch charge may apply unless otherwise agreed under an institutional service agreement.
             </p>
             <p>
-              If the designated recipient is unavailable or fails ID verification after 2 doorstep attempts, the package is automatically secured in our central Accra vault for 48 hours while dispatch attempts re-contact with the sender.
+              If the designated recipient is unavailable or fails ID verification after courtesy delivery attempts, the package is securely held in our central Accra vault while dispatch coordinates with the sender.
+            </p>
+            <p className="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <strong>Corporate Policy:</strong> For comprehensive rules on courier assignment stages, courtesy redeliveries, rescheduling fees, and refund claims, please review our official{" "}
+              <Link href="/refund" className="text-brand-red-600 font-bold underline hover:text-brand-red-700">
+                Refund, Cancellation & Rescheduling Policy
+              </Link>.
             </p>
           </section>
 
