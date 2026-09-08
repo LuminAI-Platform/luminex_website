@@ -91,7 +91,12 @@ const FAQ_DATA: FAQCategory[] = [
       {
         question: "Who do I contact for customer service issues or refunds?",
         answer:
-          "For customer service inquiries, status escalation, or refund requests, reach our Head of Customer Relations directly on +233 59 646 4461 (call or WhatsApp) or email luminexlogisticsltd@gmail.com.",
+          "For customer service inquiries, status escalation, or refund requests, reach our Head of Customer Relations directly on +233 59 646 4461 (call or WhatsApp) or email luminexlogisticsltd@gmail.com. Requests are acknowledged within 1 business day and reviewed within 3–5 business days.",
+      },
+      {
+        question: "What is your cancellation and courtesy redelivery policy?",
+        answer:
+          "Cancellations before courier assignment receive a full refund or invoice credit. If a recipient is unavailable, Luminex provides two courtesy redelivery attempts before returning the consignment to our secure central vault. Full terms are outlined in our Refund Policy.",
       },
       {
         question: "Do you offer corporate invoicing for law firms and institutions?",
