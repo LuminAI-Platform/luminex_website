@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { getSupabaseServerClient } from "@/lib/supabase";
+
+/** Rate limiter: 10 contact submissions per IP per 60 seconds. */
+const contactLimiter = createRateLimiter({ maxRequests: 10, windowMs: 60_000 });
 
 interface ContactRequestBody {
   fullName?: string;
@@ -17,6 +22,19 @@ interface ContactRequestBody {
  */
 export async function POST(request: Request) {
   try {
+    // ── Rate Limiting ────────────────────────────────────────────────
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { success: withinLimit } = contactLimiter.check(ip);
+    if (!withinLimit) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment and try again." },
+        {
+          status: 429,
+          headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" },
+        }
+      );
+    }
+
     const body: ContactRequestBody = await request.json();
     const { fullName, email, phone, subject, message, honeypot, renderedAt } = body;
 
@@ -73,6 +91,30 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
     };
 
+    // ── Tier 4: Database Persistence (Supabase PostgreSQL) ────────────
+    const supabase = getSupabaseServerClient();
+
+    if (supabase) {
+      const { error: insertError } = await supabase
+        .from("inquiries")
+        .insert([{
+          full_name: sanitizedData.fullName,
+          email: sanitizedData.email,
+          phone: sanitizedData.phone || null,
+          subject: sanitizedData.subject,
+          message: sanitizedData.message,
+        }]);
+
+      if (insertError) {
+        console.error("[Supabase Database Error - Inquiry Insert]:", insertError);
+        // Don't block — continue to email notification even if DB fails
+      }
+    } else {
+      console.warn(
+        `[Supabase Unconfigured] Inquiry logged locally: From="${sanitizedData.fullName}" <${sanitizedData.email}>`
+      );
+    }
+
     // ── Tier 4: Email / Notification Dispatch Hook ───────────────────
     // If an email service API key (e.g. RESEND_API_KEY) is configured in .env,
     // the system will forward the notification to the dispatch desk.
@@ -89,7 +131,9 @@ export async function POST(request: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Luminex Inquiries <noreply@luminexlogistics.com>",
+            from:
+              process.env.RESEND_FROM_EMAIL ||
+              "Luminex Inquiries <onboarding@resend.dev>",
             to: [notificationRecipient],
             reply_to: sanitizedData.email,
             subject: `[Dispatch Inquiry] ${sanitizedData.subject} — ${sanitizedData.fullName}`,

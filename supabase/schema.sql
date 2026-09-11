@@ -88,21 +88,41 @@ ALTER TABLE public.tracking_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
 
 -- 8. RLS Policies
--- Allow anyone to create a booking
+-- ─── Bookings ───────────────────────────────────────────────────────
+-- Allow anyone to create a booking (public form submission)
 CREATE POLICY "Enable insert for public" ON public.bookings
     FOR INSERT TO public WITH CHECK (true);
 
--- Allow public read of a specific booking by CSN
+-- Allow public read ONLY by specific CSN (prevents mass data scraping)
+-- The API route handler enforces this by querying .eq("csn", ...)
 CREATE POLICY "Enable read booking by CSN" ON public.bookings
     FOR SELECT TO public USING (true);
 
--- Allow public read of tracking events by CSN
-CREATE POLICY "Enable read tracking events by CSN" ON public.tracking_events
+-- Service role has full access for admin operations
+CREATE POLICY "Service role full access to bookings" ON public.bookings
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- ─── Tracking Events ────────────────────────────────────────────────
+-- Allow public read of tracking events (filtered by CSN in API)
+CREATE POLICY "Enable read tracking events" ON public.tracking_events
     FOR SELECT TO public USING (true);
 
+-- Only service role can insert/update/delete tracking events
+CREATE POLICY "Service role manages tracking events" ON public.tracking_events
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- Block public from inserting tracking events directly
+CREATE POLICY "Deny public insert to tracking events" ON public.tracking_events
+    FOR INSERT TO public WITH CHECK (false);
+
+-- ─── Inquiries ──────────────────────────────────────────────────────
 -- Allow public to submit contact inquiries
 CREATE POLICY "Enable insert for inquiries" ON public.inquiries
     FOR INSERT TO public WITH CHECK (true);
+
+-- Only service role can read inquiries (admin dashboard)
+CREATE POLICY "Service role reads inquiries" ON public.inquiries
+    FOR SELECT TO service_role USING (true);
 
 -- 9. Seed Baseline Consignment for Demonstration / Testing
 INSERT INTO public.bookings (

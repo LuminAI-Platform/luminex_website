@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+/** Rate limiter: 5 booking submissions per IP per 60 seconds. */
+const bookingLimiter = createRateLimiter({ maxRequests: 5, windowMs: 60_000 });
 
 interface BookingRequestBody {
   senderName?: string;
@@ -15,10 +19,11 @@ interface BookingRequestBody {
   renderedAt?: number; // Timing heuristic
 }
 
-/** Generate unique Consignment Security Number (CSN) */
+/** Generate unique Consignment Security Number (CSN) with high entropy. */
 function generateCSN(): string {
-  const randomDigits = Math.floor(1000 + Math.random() * 9000);
-  return `LMX-GRA-${randomDigits}`;
+  const timePart = Date.now().toString(36).toUpperCase().slice(-5);
+  const randomPart = Math.floor(100000 + Math.random() * 900000);
+  return `LMX-${timePart}-${randomPart}`;
 }
 
 /**
@@ -29,6 +34,19 @@ function generateCSN(): string {
  */
 export async function POST(request: Request) {
   try {
+    // ── Rate Limiting ────────────────────────────────────────────────
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const { success: withinLimit, remaining } = bookingLimiter.check(ip);
+    if (!withinLimit) {
+      return NextResponse.json(
+        { error: "Too many booking requests. Please wait a moment and try again." },
+        {
+          status: 429,
+          headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" },
+        }
+      );
+    }
+
     const body: BookingRequestBody = await request.json();
     const {
       senderName,
@@ -197,7 +215,9 @@ export async function POST(request: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "Luminex Dispatch <dispatch@luminexlogistics.com>",
+            from:
+              process.env.RESEND_FROM_EMAIL ||
+              "Luminex Dispatch <onboarding@resend.dev>",
             to: [notificationEmail],
             reply_to: sanitizedBooking.sender_email,
             subject: `[New Booking] CSN ${csn} — Pickup from ${sanitizedBooking.sender_name}`,
