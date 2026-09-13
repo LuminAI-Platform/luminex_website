@@ -152,14 +152,16 @@ export async function GET(
     }
   }
 
-  // Fallback to baseline in-memory store for demonstration
-  const fallback = BASELINE_MOCK[normalizedCSN];
-  if (fallback) {
-    return NextResponse.json({
-      success: true,
-      csn: normalizedCSN,
-      steps: fallback,
-    });
+  // Fallback to baseline in-memory store for demonstration (development only)
+  if (process.env.NODE_ENV === "development") {
+    const fallback = BASELINE_MOCK[normalizedCSN];
+    if (fallback) {
+      return NextResponse.json({
+        success: true,
+        csn: normalizedCSN,
+        steps: fallback,
+      });
+    }
   }
 
   return NextResponse.json(
