@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MessageSquare, Send, Lock, Loader2, AlertCircle } from "lucide-react";
-
+import { MessageSquare, Send, Lock, Loader2, AlertCircle, ChevronDown } from "lucide-react";
 // ── Types ────────────────────────────────────────────────────────────
 
 interface InquiryFormData {
@@ -49,8 +48,21 @@ export default function ContactInquiryForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     renderedAtRef.current = Date.now();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /** Update a single form field by key. */
@@ -94,6 +106,9 @@ export default function ContactInquiryForm() {
       setIsSubmitting(false);
     }
   };
+
+  const selectedLabel =
+    SUBJECT_OPTIONS.find((opt) => opt.value === formData.subject)?.label || "Select inquiry subject";
 
   // ── Success State ──────────────────────────────────────────────────
   if (submitted) {
@@ -199,21 +214,44 @@ export default function ContactInquiryForm() {
             />
           </div>
 
-          <div>
+          <div className="relative" ref={dropdownRef}>
             <label className="block text-xs font-bold text-navy-900 uppercase tracking-wider mb-2">
               Inquiry Subject
             </label>
-            <select
-              value={formData.subject}
-              onChange={(e) => updateField("subject", e.target.value)}
-              className={`${INPUT_CLASS} bg-white cursor-pointer`}
+            
+            <button
+              type="button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`${INPUT_CLASS} bg-white cursor-pointer w-full flex items-center justify-between text-left`}
             >
-              {SUBJECT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              <span className="truncate">{selectedLabel}</span>
+              <ChevronDown
+                className={`w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0 ${
+                  isDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                {SUBJECT_OPTIONS.map((opt) => (
+                  <div
+                    key={opt.value}
+                    onClick={() => {
+                      updateField("subject", opt.value);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                      formData.subject === opt.value
+                        ? "bg-slate-100 text-navy-900 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
