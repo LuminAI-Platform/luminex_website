@@ -21,12 +21,15 @@ export default function CookieConsent() {
   const [consent, setConsent] = useState<ConsentStatus | "pending">("pending");
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CONSENT_KEY) as ConsentStatus;
-      setConsent(stored);
-    } catch {
-      setConsent(null);
-    }
+    const rafId = window.requestAnimationFrame(() => {
+      try {
+        const stored = localStorage.getItem(CONSENT_KEY) as ConsentStatus;
+        setConsent(stored);
+      } catch {
+        setConsent(null);
+      }
+    });
+    return () => window.cancelAnimationFrame(rafId);
   }, []);
 
   const handleAccept = () => {

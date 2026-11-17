@@ -59,14 +59,6 @@ const LEADERS: TeamMember[] = [
 
 // ── Component ────────────────────────────────────────────────────────
 
-/**
- * Executive Leadership team section.
- *
- * Displays cards for Luminex Logistics leadership team members
- * with high-resolution portraits, official titles, and domain bios.
- * Responsive grid: 1-col (mobile) → 2-col (tablet) → 3-col / 4-col (desktop).
- * Used on the About page.
- */
 export default function Team() {
   return (
     <div className="max-w-6xl mx-auto">
@@ -78,7 +70,7 @@ export default function Team() {
             Executive Leadership & Advisory
           </h2>
         </div>
-        <p className="text-slate-500 max-w-2xl pl-4.5 text-base leading-relaxed">
+        <p className="text-slate-500 max-w-2xl pl-4 text-base leading-relaxed">
           Led by seasoned industry practitioners dedicated to institutional security,
           strict compliance, and flawless logistical precision across Ghana.
         </p>
@@ -89,16 +81,16 @@ export default function Team() {
         {LEADERS.map((leader) => (
           <div
             key={leader.name}
-            className="bg-slate-50 border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-200 group"
+            className="bg-slate-50 border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-200"
           >
             <div>
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 border-white shadow-sm mb-4 sm:mb-5 group-hover:scale-105 transition-transform duration-200">
+              <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden border-2 border-white shadow-sm mb-4 sm:mb-5">
                 <Image
                   src={leader.image}
                   alt={`${leader.name} — ${leader.role}`}
                   fill
-                  sizes="(max-width: 640px) 80px, 96px"
-                  className="object-cover"
+                  sizes="(max-width: 640px) 128px, 144px"
+                  className="object-cover object-top"
                 />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-navy-900 leading-tight">

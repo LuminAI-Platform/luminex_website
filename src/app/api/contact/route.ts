@@ -3,7 +3,11 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { getSupabaseServerClient } from "@/lib/supabase";
 
 /** Rate limiter: 10 contact submissions per IP per 60 seconds. */
-const contactLimiter = createRateLimiter({ maxRequests: 10, windowMs: 60_000 });
+const contactLimiter = createRateLimiter({
+  namespace: "contact",
+  maxRequests: 10,
+  windowMs: 60_000,
+});
 
 interface ContactRequestBody {
   fullName?: string;

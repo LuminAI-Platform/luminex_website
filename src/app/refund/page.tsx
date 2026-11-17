@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   FileText,
   Phone,
-  Mail,
   CheckCircle2,
   Truck,
   Calendar,

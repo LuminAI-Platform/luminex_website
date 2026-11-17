@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase";
+import { randomBytes } from "crypto";
+import {
+  formatTimestampGMT,
+  getSupabaseServerClient,
+  saveLocalConsignment,
+} from "@/lib/supabase";
 import { createRateLimiter } from "@/lib/rate-limit";
 
 /** Rate limiter: 5 booking submissions per IP per 60 seconds. */
-const bookingLimiter = createRateLimiter({ maxRequests: 5, windowMs: 60_000 });
+const bookingLimiter = createRateLimiter({
+  namespace: "book",
+  maxRequests: 5,
+  windowMs: 60_000,
+});
 
 interface BookingRequestBody {
   senderName?: string;
@@ -19,11 +28,17 @@ interface BookingRequestBody {
   renderedAt?: number; // Timing heuristic
 }
 
-/** Generate unique Consignment Security Number (CSN) with high entropy. */
+/** Generate cryptographically random, unguessable Consignment Security Number (CSN). */
 function generateCSN(): string {
-  const timePart = Date.now().toString(36).toUpperCase().slice(-5);
-  const randomPart = Math.floor(100000 + Math.random() * 900000);
-  return `LMX-${timePart}-${randomPart}`;
+  const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const bytes = randomBytes(8);
+  let block1 = "";
+  let block2 = "";
+  for (let i = 0; i < 4; i++) {
+    block1 += alphabet[bytes[i] % alphabet.length];
+    block2 += alphabet[bytes[i + 4] % alphabet.length];
+  }
+  return `LMX-${block1}-${block2}`;
 }
 
 /**
@@ -36,7 +51,7 @@ export async function POST(request: Request) {
   try {
     // ── Rate Limiting ────────────────────────────────────────────────
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const { success: withinLimit, remaining } = bookingLimiter.check(ip);
+    const { success: withinLimit } = bookingLimiter.check(ip);
     if (!withinLimit) {
       return NextResponse.json(
         { error: "Too many booking requests. Please wait a moment and try again." },
@@ -161,7 +176,7 @@ export async function POST(request: Request) {
 
     if (supabase) {
       const { data, error: insertError } = await supabase
-        .from("bookings")
+        .from<{ id: string }>("bookings")
         .insert([sanitizedBooking])
         .select("id")
         .single();
@@ -174,15 +189,16 @@ export async function POST(request: Request) {
         );
       }
 
-      bookingId = data?.id;
+      bookingId = data?.id ?? null;
 
       // Create initial timeline step for custody tracking
       const initialStep = {
         booking_id: bookingId,
         csn,
         step_number: 1,
-        title: "Dispatch Request Registered",
-        description: "Consignment manifest registered in custody network. Staging for courier pickup.",
+        title: "Booking Request Logged",
+        description:
+          "Your delivery request has been received. Our Head of Operations will contact you to confirm pickup.",
         status: "completed",
         required_id: verificationProtocol.replace("_", " ").toUpperCase(),
       };
@@ -199,6 +215,41 @@ export async function POST(request: Request) {
         `[Supabase Unconfigured] Generated local booking ref: CSN=${csn} (Sender: ${sanitizedBooking.sender_name})`
       );
     }
+
+    // Store in local fallback so newly booked CSNs are immediately trackable
+    const nowFormatted = formatTimestampGMT(new Date());
+
+    saveLocalConsignment(csn, [
+      {
+        id: "1",
+        title: "Booking Request Logged",
+        timestamp: nowFormatted,
+        description:
+          "Your delivery request has been received. Our Head of Operations will contact you to confirm pickup.",
+        status: "completed",
+      },
+      {
+        id: "2",
+        title: "Pickup Confirmation & Dispatch",
+        timestamp: nowFormatted,
+        description: "Confirming pickup details and assigning your courier.",
+        status: "in_progress",
+        courier: "Pending Assignment",
+        requiredId: verificationProtocol.replace("_", " ").toUpperCase(),
+      },
+      {
+        id: "3",
+        title: "Out for Delivery",
+        description: "With your courier, on the way to destination.",
+        status: "pending",
+      },
+      {
+        id: "4",
+        title: "Destination Handover",
+        description: "Waiting for recipient ID check and signature.",
+        status: "pending",
+      },
+    ]);
 
     // ── Tier 5: Non-blocking Staff Notification (Email / Webhook) ────
     // Isolated in try/catch so email failure never blocks successful booking

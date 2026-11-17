@@ -1,5 +1,20 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase";
+import {
+  formatTimestampGMT,
+  getLocalConsignment,
+  getSupabaseServerClient,
+} from "@/lib/supabase";
+import { createRateLimiter } from "@/lib/rate-limit";
+
+/** Rate limiter: 10 tracking lookups per IP per 60 seconds. */
+const trackLimiter = createRateLimiter({
+  namespace: "track",
+  maxRequests: 10,
+  windowMs: 60_000,
+});
+
+const NOT_FOUND_MESSAGE =
+  "We couldn't find a consignment matching that CSN. Please check the number and try again.";
 
 interface TimelineStep {
   id: string;
@@ -11,66 +26,120 @@ interface TimelineStep {
   requiredId?: string;
 }
 
+interface BookingRow {
+  id: string;
+  created_at: string;
+  assigned_courier?: string | null;
+  verification_protocol?: string | null;
+}
+
+interface TrackingEventRow {
+  id: string;
+  title: string;
+  description: string;
+  status: TimelineStep["status"];
+  assigned_courier?: string | null;
+  required_id?: string | null;
+  event_timestamp?: string | null;
+}
+
+/**
+ * Redacts full courier names so only a courier code or first name is exposed publicly.
+ */
+function sanitizeCourierDisplay(raw?: string | null): string | undefined {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toLowerCase() === "pending assignment") return "Pending Assignment";
+
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) return parts[0];
+
+  // If prefixed with "Agent" or "Courier", keep prefix + first name/initial only
+  if (/^(agent|courier)$/i.test(parts[0]) && parts.length >= 2) {
+    return `${parts[0]} ${parts[1]}`;
+  }
+
+  // Otherwise return first name + last initial
+  return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
+}
+
+const DEMO_STEPS: TimelineStep[] = [
+  {
+    id: "1",
+    title: "Accra HQ Intake",
+    timestamp: "24 Oct 2026, 08:00 GMT",
+    description: "Received at our Accra office and sealed.",
+    status: "completed",
+  },
+  {
+    id: "2",
+    title: "Accra Hub Sorting",
+    timestamp: "24 Oct 2026, 10:30 GMT",
+    description: "Sorted at our Accra hub.",
+    status: "completed",
+  },
+  {
+    id: "3",
+    title: "Out for Delivery",
+    timestamp: "24 Oct 2026, 11:15 GMT",
+    description: "With your courier, on the way.",
+    status: "in_progress",
+    courier: "Agent K.",
+    requiredId: "National ID / Passport",
+  },
+  {
+    id: "4",
+    title: "Destination Handover",
+    description: "Waiting for the recipient's signature.",
+    status: "pending",
+  },
+];
+
 const BASELINE_MOCK: Record<string, TimelineStep[]> = {
-  "LMX-GRA-8064": [
-    {
-      id: "1",
-      title: "Accra HQ Intake",
-      timestamp: "08:00 AM, Oct 24",
-      description: "Document received and sealed in tamper-evident sleeve.",
-      status: "completed",
-    },
-    {
-      id: "2",
-      title: "Sorting Vault Transit",
-      timestamp: "10:30 AM, Oct 24",
-      description: "Cleared central security vault routing.",
-      status: "completed",
-    },
-    {
-      id: "3",
-      title: "Out for Secure Delivery",
-      description:
-        "Consignment is in the custody of vetted courier en route to destination.",
-      status: "in_progress",
-      courier: "Agent K. Mensah",
-      requiredId: "National ID / Passport",
-    },
-    {
-      id: "4",
-      title: "Destination Verification",
-      description: "Awaiting final biometric signature and handover.",
-      status: "pending",
-    },
-  ],
+  "LMX-8F3K-92B4": DEMO_STEPS,
 };
 
 /**
  * GET /api/track/[csn]
- * Looks up custody timeline steps from Supabase PostgreSQL for a specific CSN.
+ * Looks up delivery progress steps from Supabase PostgreSQL for a specific CSN.
  */
 export async function GET(
   request: Request,
   props: { params: Promise<{ csn: string }> }
 ) {
+  // ── Rate Limiting per IP ─────────────────────────────────────────
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const { success: withinLimit } = trackLimiter.check(ip);
+  if (!withinLimit) {
+    return NextResponse.json(
+      { error: "Too many tracking requests. Please wait a moment and try again." },
+      {
+        status: 429,
+        headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" },
+      }
+    );
+  }
+
   const { csn } = await props.params;
   const normalizedCSN = (csn || "").trim().toUpperCase();
 
-  if (!normalizedCSN || normalizedCSN.length < 5) {
-    return NextResponse.json(
-      { error: "A valid Consignment Security Number (CSN) is required." },
-      { status: 400 }
-    );
+  // Uniform 404 response for any invalid or non-existent tracking number
+  if (!/^[A-Z0-9-]{5,32}$/.test(normalizedCSN)) {
+    return NextResponse.json({ error: NOT_FOUND_MESSAGE }, { status: 404 });
   }
 
   const supabase = getSupabaseServerClient();
 
   if (supabase) {
     try {
-      // Query tracking events
+      // Query only the columns needed by the recipient
       const { data: events, error: eventsError } = await supabase
-        .from("tracking_events")
-        .select("*")
+        .from<TrackingEventRow[]>("tracking_events")
+        .select(
+          "id, title, description, status, assigned_courier, required_id, event_timestamp"
+        )
         .eq("csn", normalizedCSN)
         .order("step_number", { ascending: true });
 
@@ -84,18 +153,10 @@ export async function GET(
           title: ev.title,
           description: ev.description,
           status: ev.status,
-          courier: ev.assigned_courier || undefined,
+          courier: sanitizeCourierDisplay(ev.assigned_courier),
           requiredId: ev.required_id || undefined,
           timestamp: ev.event_timestamp
-            ? new Date(ev.event_timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }) +
-              ", " +
-              new Date(ev.event_timestamp).toLocaleDateString([], {
-                month: "short",
-                day: "numeric",
-              })
+            ? formatTimestampGMT(ev.event_timestamp)
             : undefined,
         }));
 
@@ -106,37 +167,47 @@ export async function GET(
         });
       }
 
-      // Check if booking exists even without tracking events
+      // Check if booking exists even without tracking events (select only non-PII fields)
       const { data: booking } = await supabase
-        .from("bookings")
-        .select("*")
+        .from<BookingRow>("bookings")
+        .select("id, created_at, assigned_courier, verification_protocol")
         .eq("csn", normalizedCSN)
         .single();
 
       if (booking) {
+        const createdTimestamp = formatTimestampGMT(booking.created_at);
         const initialTimeline: TimelineStep[] = [
           {
             id: booking.id,
-            title: "Dispatch Request Registered",
-            description: `Consignment manifest logged for ${booking.sender_name}. Awaiting courier pickup.`,
+            title: "Booking Request Logged",
+            description:
+              "Your delivery request has been received. Our Head of Operations will contact you to confirm pickup.",
             status: "completed",
-            timestamp: new Date(booking.created_at).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            timestamp: createdTimestamp,
           },
           {
             id: "2",
-            title: "Out for Secure Delivery",
-            description: "Consignment will be assigned to a vetted courier.",
+            title: "Pickup Confirmation & Dispatch",
+            description: "Confirming pickup details and assigning your courier.",
             status: "in_progress",
-            courier: booking.assigned_courier || "Pending Assignment",
-            requiredId: booking.verification_protocol?.replace("_", " ").toUpperCase(),
+            timestamp: createdTimestamp,
+            courier:
+              sanitizeCourierDisplay(booking.assigned_courier) ||
+              "Pending Assignment",
+            requiredId: booking.verification_protocol
+              ?.replace("_", " ")
+              .toUpperCase(),
           },
           {
             id: "3",
-            title: "Destination Verification",
-            description: "Awaiting final identity check and handover.",
+            title: "Out for Delivery",
+            description: "With your courier, on the way to destination.",
+            status: "pending",
+          },
+          {
+            id: "4",
+            title: "Destination Handover",
+            description: "Waiting for recipient ID check and signature.",
             status: "pending",
           },
         ];
@@ -152,22 +223,26 @@ export async function GET(
     }
   }
 
-  // Fallback to baseline in-memory store for demonstration (development only)
-  if (process.env.NODE_ENV === "development") {
-    const fallback = BASELINE_MOCK[normalizedCSN];
-    if (fallback) {
-      return NextResponse.json({
-        success: true,
-        csn: normalizedCSN,
-        steps: fallback,
-      });
-    }
+  // Check local in-memory bookings first
+  const localRecord = getLocalConsignment(normalizedCSN);
+  if (localRecord) {
+    return NextResponse.json({
+      success: true,
+      csn: normalizedCSN,
+      steps: localRecord,
+    });
   }
 
-  return NextResponse.json(
-    {
-      error: `No active consignment found matching record "${normalizedCSN}". Please verify your CSN.`,
-    },
-    { status: 404 }
-  );
+  // Check clearly marked sample consignment preview
+  const sampleRecord = BASELINE_MOCK[normalizedCSN];
+  if (sampleRecord) {
+    return NextResponse.json({
+      success: true,
+      csn: normalizedCSN,
+      isSample: true,
+      steps: sampleRecord,
+    });
+  }
+
+  return NextResponse.json({ error: NOT_FOUND_MESSAGE }, { status: 404 });
 }

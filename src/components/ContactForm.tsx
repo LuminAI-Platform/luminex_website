@@ -4,8 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   MapPin,
   Truck,
-  FileText,
-  Lock,
   Loader2,
   AlertCircle,
   MessageSquareText,
@@ -87,10 +85,10 @@ export function ContactForm() {
   /** Direct WhatsApp template for quick booking */
   const directWhatsAppUrl = `https://wa.me/${HEAD_OF_OPS_WA_NUMBER}?text=${encodeURIComponent(
     `Hello Luminex Logistics, I would like to schedule a courier delivery:\n\n` +
-      `• Full Name: \n` +
-      `• Phone Number: \n` +
-      `• Delivery / Pickup Address: \n` +
-      `• Verification ID Type (Ghana Card / Passport): `
+    `• Full Name: \n` +
+    `• Phone Number: \n` +
+    `• Delivery / Pickup Address: \n` +
+    `• Verification ID Type (Ghana Card / Passport): `
   )}`;
 
   /** Handle form submission with live backend Route Handler. */
@@ -145,15 +143,15 @@ export function ContactForm() {
   /** URL to share completed booking manifest to Head of Operations */
   const postBookingWhatsAppUrl = generatedCSN
     ? `https://wa.me/${HEAD_OF_OPS_WA_NUMBER}?text=${encodeURIComponent(
-        `Hello Head of Operations, I have submitted a delivery booking on the Luminex website:\n\n` +
-          `• Tracking CSN: ${generatedCSN}\n` +
-          `• Full Name: ${formData.senderName}\n` +
-          `• Phone Number: ${formData.senderContact}\n` +
-          `• Pickup Address: ${formData.collectionAddress}\n` +
-          `• Destination: ${formData.destinationAddress || formData.collectionAddress}\n` +
-          `• Verification ID: ${formData.verificationProtocol.replace("_", " ").toUpperCase()}\n\n` +
-          `Please confirm my booking and arrange payment method.`
-      )}`
+      `Hello Head of Operations, I have submitted a delivery booking on the Luminex website:\n\n` +
+      `• Tracking CSN: ${generatedCSN}\n` +
+      `• Full Name: ${formData.senderName}\n` +
+      `• Phone Number: ${formData.senderContact}\n` +
+      `• Pickup Address: ${formData.collectionAddress}\n` +
+      `• Destination: ${formData.destinationAddress || formData.collectionAddress}\n` +
+      `• Verification ID: ${formData.verificationProtocol.replace("_", " ").toUpperCase()}\n\n` +
+      `Please confirm my booking and arrange payment method.`
+    )}`
     : directWhatsAppUrl;
 
   return (

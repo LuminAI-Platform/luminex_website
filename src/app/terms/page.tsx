@@ -16,7 +16,6 @@ import {
   Bot,
   UserCheck,
   Phone,
-  Mail,
   HelpCircle,
 } from "lucide-react";
 

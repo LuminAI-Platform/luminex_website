@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -62,78 +62,93 @@ export default function Navbar() {
   useEffect(() => {
     if (pathname !== "/") return;
 
-    // Sync hash from URL on initial load
-    if (typeof window !== "undefined" && window.location.hash) {
-      const initialHash = window.location.hash;
-      requestAnimationFrame(() => {
-        setActiveHash(initialHash);
-      });
-    }
+    let rafId: number | null = null;
 
-    const handleHashChange = () => {
-      setActiveHash(window.location.hash);
-    };
+    const updateActiveSection = () => {
+      rafId = null;
+      const servicesEl = document.getElementById("services");
+      if (!servicesEl) return;
 
-    window.addEventListener("hashchange", handleHashChange);
-    window.addEventListener("popstate", handleHashChange);
+      const scrollTop = Math.max(
+        window.scrollY || 0,
+        document.documentElement.scrollTop || 0,
+        document.body.scrollTop || 0
+      );
 
-    // Observe visible homepage sections
-    const sectionIds = ["services"];
-    const sectionElements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
+      // At the very top of the page, Home is always active unless user explicitly jumped to #services
+      if (scrollTop < 40 && window.location.hash !== "#services") {
+        setActiveHash("");
+        return;
+      }
 
-    let observer: IntersectionObserver | null = null;
+      const rect = servicesEl.getBoundingClientRect();
+      // Activate Services as soon as Core Competencies enters the upper 60% of the viewport
+      const triggerY = Math.max(160, window.innerHeight * 0.6);
 
-    if (sectionElements.length > 0) {
-      const observerCallback: IntersectionObserverCallback = (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveHash(`#${entry.target.id}`);
-          }
-        });
-      };
-
-      observer = new IntersectionObserver(observerCallback, {
-        root: null,
-        rootMargin: "-20% 0px -50% 0px",
-        threshold: 0,
-      });
-
-      sectionElements.forEach((el) => observer?.observe(el));
-    }
-
-    // Reset active hash when scrolled to very top
-    const handleScroll = () => {
-      if (window.scrollY < 100) {
+      if (rect.top <= triggerY) {
+        setActiveHash("#services");
+      } else {
         setActiveHash("");
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const scheduleUpdate = () => {
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(updateActiveSection);
+      }
+    };
+
+    const handleHashChange = () => {
+      if (window.location.hash === "#services") {
+        setActiveHash("#services");
+      } else {
+        scheduleUpdate();
+      }
+    };
+
+    // Sync initial state (handles direct load on /#services and client-side return to /)
+    if (window.location.hash === "#services") {
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        setActiveHash("#services");
+      });
+    } else {
+      scheduleUpdate();
+    }
+
+    // Listen on both window and document (capture) so scroll is caught regardless of scroll container
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    document.addEventListener("scroll", scheduleUpdate, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("popstate", handleHashChange);
 
     return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener("scroll", scheduleUpdate);
+      document.removeEventListener("scroll", scheduleUpdate, { capture: true });
+      window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("hashchange", handleHashChange);
       window.removeEventListener("popstate", handleHashChange);
-      window.removeEventListener("scroll", handleScroll);
-      observer?.disconnect();
     };
   }, [pathname]);
 
   /** Determine if a nav link matches the current route or hash anchor. */
-  const checkIsActive = useCallback(
-    (href: string) => {
-      if (href.startsWith("/#")) {
-        const targetHash = href.replace("/", "");
-        return pathname === "/" && activeHash === targetHash;
-      }
-      if (href === "/") {
-        return pathname === "/" && (activeHash === "" || activeHash === "#");
-      }
-      return pathname === href;
-    },
-    [pathname, activeHash]
-  );
+  const checkIsActive = (href: string) => {
+    if (href.startsWith("/#")) {
+      const targetHash = href.replace("/", "");
+      return pathname === "/" && activeHash === targetHash;
+    }
+    if (href === "/") {
+      return pathname === "/" && (activeHash === "" || activeHash === "#");
+    }
+    return pathname === href;
+  };
 
   /** Handle smooth-scroll for hash links and scroll-to-top for Home. */
   const handleLinkClick = (href: string) => {
@@ -193,11 +208,10 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => handleLinkClick(link.href)}
-                className={`py-1 transition-colors duration-200 border-b-2 ${
-                  isActive
-                    ? "text-brand-red-600 font-semibold border-brand-red-600"
-                    : "border-transparent hover:text-brand-red-600"
-                }`}
+                className={`py-1 transition-colors duration-200 border-b-2 ${isActive
+                  ? "text-brand-red-600 font-semibold border-brand-red-600"
+                  : "border-transparent hover:text-brand-red-600"
+                  }`}
               >
                 {link.name}
               </Link>
@@ -209,22 +223,20 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/track"
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded font-bold text-sm border transition-colors duration-200 ${
-              pathname === "/track"
-                ? "border-brand-red-600 text-brand-red-600 bg-brand-red-50"
-                : "border-slate-300 text-slate-700 hover:border-navy-900 hover:text-navy-900"
-            }`}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded font-bold text-sm border transition-colors duration-200 ${pathname === "/track"
+              ? "border-brand-red-600 text-brand-red-600 bg-brand-red-50"
+              : "border-slate-300 text-slate-700 hover:border-navy-900 hover:text-navy-900"
+              }`}
           >
             <Truck className="w-4 h-4" />
             Track
           </Link>
           <Link
             href="/book"
-            className={`px-4 py-2 rounded font-bold text-sm text-white transition-colors duration-200 ${
-              pathname === "/book"
-                ? "bg-brand-red-600"
-                : "bg-slate-900 hover:bg-brand-red-600"
-            }`}
+            className={`px-4 py-2 rounded font-bold text-sm text-white transition-colors duration-200 ${pathname === "/book"
+              ? "bg-brand-red-600"
+              : "bg-slate-900 hover:bg-brand-red-600"
+              }`}
           >
             Book Courier
           </Link>
@@ -265,9 +277,8 @@ export default function Navbar() {
       {/* ── Mobile Drawer (animated slide-down) ──────────────────── */}
       <div
         ref={drawerRef}
-        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-        }`}
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
         aria-hidden={!isOpen}
       >
         <div className="bg-white border-t border-slate-100 px-4 sm:px-6 pt-4 pb-5 space-y-1">
@@ -281,11 +292,10 @@ export default function Navbar() {
                   handleLinkClick(link.href);
                   setIsOpen(false);
                 }}
-                className={`block py-2.5 px-3 rounded-lg font-semibold text-sm transition-colors duration-150 ${
-                  isActive
-                    ? "text-brand-red-600 bg-brand-red-50"
-                    : "text-slate-700 hover:text-brand-red-600 hover:bg-slate-50"
-                }`}
+                className={`block py-2.5 px-3 rounded-lg font-semibold text-sm transition-colors duration-150 ${isActive
+                  ? "text-brand-red-600 bg-brand-red-50"
+                  : "text-slate-700 hover:text-brand-red-600 hover:bg-slate-50"
+                  }`}
               >
                 {link.name}
               </Link>

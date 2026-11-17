@@ -5,7 +5,7 @@ const SITE_URL =
 
 /**
  * Generates dynamic XML sitemap with change frequencies and priorities
- * for all 8 indexable routes.
+ * for all 9 indexable routes.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date();
