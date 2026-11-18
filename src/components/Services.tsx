@@ -74,7 +74,7 @@ function ServiceCard({ icon: Icon, title, description }: ServiceItem) {
  */
 export default function Services() {
   return (
-    <section id="services" className="bg-slate-50 py-16 md:py-24">
+    <section id="services" className="bg-slate-50 py-16 md:py-24 scroll-mt-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-10 sm:mb-12">

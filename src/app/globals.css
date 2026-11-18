@@ -15,6 +15,8 @@
 
   --color-brand-red-50: #fef2f2;
   --color-brand-red-100: #fee2e2;
+  --color-brand-red-300: #fca5a5;
+  --color-brand-red-400: #f87171;
   --color-brand-red-500: #d32f2f;
   --color-brand-red-600: #c0392b;
   --color-brand-red-700: #9e2a1e;
@@ -37,7 +39,7 @@ body {
   background-color: var(--color-bg-light);
   color: var(--color-neutral-dark);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -47,13 +49,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #0a1931;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #c0392b;
 }

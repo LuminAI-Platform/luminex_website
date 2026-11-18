@@ -138,9 +138,8 @@ export default function FAQAccordion() {
                   >
                     <span className="pr-4">{item.question}</span>
                     <ChevronDown
-                      className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-brand-red-500" : ""
-                      }`}
+                      className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180 text-brand-red-500" : ""
+                        }`}
                     />
                   </button>
                   {isOpen && (

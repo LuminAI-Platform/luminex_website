@@ -178,7 +178,7 @@ export default function ContactInquiryForm() {
             <input
               type="text"
               required
-              placeholder="Jane Doe"
+              placeholder="Jane Ansah"
               value={formData.fullName}
               onChange={(e) => updateField("fullName", e.target.value)}
               className={INPUT_CLASS}
@@ -192,7 +192,7 @@ export default function ContactInquiryForm() {
             <input
               type="email"
               required
-              placeholder="j.doe@company.com"
+              placeholder="j.ansah@company.com"
               value={formData.email}
               onChange={(e) => updateField("email", e.target.value)}
               className={INPUT_CLASS}

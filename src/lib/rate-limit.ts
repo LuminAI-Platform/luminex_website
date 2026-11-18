@@ -14,10 +14,14 @@ interface RateLimitEntry {
 }
 
 interface RateLimiterConfig {
+  /** Unique namespace to isolate rate-limit counters per route. */
+  namespace?: string;
   /** Maximum number of requests allowed per window. */
   maxRequests: number;
   /** Time window in milliseconds. */
   windowMs: number;
+  /** Optional cap on tracked keys to prevent unbounded memory growth. */
+  maxKeys?: number;
 }
 
 const stores = new Map<string, Map<string, RateLimitEntry>>();
@@ -40,7 +44,8 @@ const stores = new Map<string, Map<string, RateLimitEntry>>();
  * ```
  */
 export function createRateLimiter(config: RateLimiterConfig) {
-  const storeKey = `${config.maxRequests}-${config.windowMs}`;
+  const storeKey = `${config.namespace || "default"}-${config.maxRequests}-${config.windowMs}`;
+  const maxKeys = config.maxKeys ?? 10_000;
 
   if (!stores.has(storeKey)) {
     stores.set(storeKey, new Map());
@@ -53,7 +58,7 @@ export function createRateLimiter(config: RateLimiterConfig) {
     const cleanupKey = `__ratelimit_cleanup_${storeKey}`;
     if (!(globalThis as Record<string, unknown>)[cleanupKey]) {
       (globalThis as Record<string, unknown>)[cleanupKey] = true;
-      setInterval(() => {
+      const timer = setInterval(() => {
         const now = Date.now();
         for (const [key, entry] of store.entries()) {
           if (now > entry.resetTime) {
@@ -61,6 +66,9 @@ export function createRateLimiter(config: RateLimiterConfig) {
           }
         }
       }, 60_000);
+      if (typeof timer === "object" && timer !== null && "unref" in timer) {
+        (timer as { unref: () => void }).unref();
+      }
     }
   }
 
@@ -74,6 +82,13 @@ export function createRateLimiter(config: RateLimiterConfig) {
       const entry = store.get(identifier);
 
       if (!entry || now > entry.resetTime) {
+        if (store.size >= maxKeys) {
+          for (const [key, existing] of store.entries()) {
+            if (now > existing.resetTime) {
+              store.delete(key);
+            }
+          }
+        }
         // New window
         store.set(identifier, {
           count: 1,
