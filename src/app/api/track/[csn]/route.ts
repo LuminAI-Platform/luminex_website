@@ -130,18 +130,39 @@ export async function GET(
     return NextResponse.json({ error: NOT_FOUND_MESSAGE }, { status: 404 });
   }
 
+  // Serve sample consignment immediately without waiting on database
+  const sampleRecord = BASELINE_MOCK[normalizedCSN];
+  if (sampleRecord) {
+    return NextResponse.json({
+      success: true,
+      csn: normalizedCSN,
+      isSample: true,
+      steps: sampleRecord,
+    });
+  }
+
   const supabase = getSupabaseServerClient();
 
   if (supabase) {
     try {
-      // Query only the columns needed by the recipient
-      const { data: events, error: eventsError } = await supabase
-        .from<TrackingEventRow[]>("tracking_events")
-        .select(
-          "id, title, description, status, assigned_courier, required_id, event_timestamp"
-        )
-        .eq("csn", normalizedCSN)
-        .order("step_number", { ascending: true });
+      // Run tracking events and booking lookups in parallel for minimal latency
+      const [eventsResult, bookingResult] = await Promise.all([
+        supabase
+          .from<TrackingEventRow[]>("tracking_events")
+          .select(
+            "id, title, description, status, assigned_courier, required_id, event_timestamp"
+          )
+          .eq("csn", normalizedCSN)
+          .order("step_number", { ascending: true }),
+        supabase
+          .from<BookingRow>("bookings")
+          .select("id, created_at, assigned_courier, verification_protocol")
+          .eq("csn", normalizedCSN)
+          .single(),
+      ]);
+
+      const { data: events, error: eventsError } = eventsResult;
+      const { data: booking } = bookingResult;
 
       if (eventsError) {
         console.error("[Supabase Track Lookup Error]:", eventsError);
@@ -166,13 +187,6 @@ export async function GET(
           steps: formattedTimeline,
         });
       }
-
-      // Check if booking exists even without tracking events (select only non-PII fields)
-      const { data: booking } = await supabase
-        .from<BookingRow>("bookings")
-        .select("id, created_at, assigned_courier, verification_protocol")
-        .eq("csn", normalizedCSN)
-        .single();
 
       if (booking) {
         const createdTimestamp = formatTimestampGMT(booking.created_at);
@@ -223,24 +237,13 @@ export async function GET(
     }
   }
 
-  // Check local in-memory bookings first
+  // Check local in-memory bookings
   const localRecord = getLocalConsignment(normalizedCSN);
   if (localRecord) {
     return NextResponse.json({
       success: true,
       csn: normalizedCSN,
       steps: localRecord,
-    });
-  }
-
-  // Check clearly marked sample consignment preview
-  const sampleRecord = BASELINE_MOCK[normalizedCSN];
-  if (sampleRecord) {
-    return NextResponse.json({
-      success: true,
-      csn: normalizedCSN,
-      isSample: true,
-      steps: sampleRecord,
     });
   }
 

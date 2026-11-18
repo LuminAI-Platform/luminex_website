@@ -62,10 +62,16 @@ export function formatTimestampGMT(input: string | Date): string {
 }
 
 /**
- * Returns whether Supabase credentials have been configured in the environment.
+ * Returns whether valid Supabase credentials have been configured in the environment.
  */
 export function isSupabaseConfigured(): boolean {
-  return Boolean(supabaseUrl && (supabaseServiceRoleKey || supabaseAnonKey));
+  if (!supabaseUrl || !(supabaseServiceRoleKey || supabaseAnonKey)) {
+    return false;
+  }
+  if (!/^https?:\/\//i.test(supabaseUrl) || supabaseUrl.includes("your-project")) {
+    return false;
+  }
+  return true;
 }
 
 interface PostgrestResult<T = Record<string, unknown>> {
@@ -129,6 +135,7 @@ class PostgrestQueryBuilder<T = Record<string, unknown>>
         headers: this.headers,
         body: this.bodyData,
         cache: "no-store",
+        signal: AbortSignal.timeout(4500),
       });
 
       const text = await response.text();

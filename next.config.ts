@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   {
     key: "X-DNS-Prefetch-Control",
@@ -31,14 +33,14 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://api.resend.com; frame-src 'self' https://www.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me;",
+    value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ${isDev ? "ws: wss: " : ""}https://*.supabase.co https://api.resend.com; frame-src 'self' https://www.google.com https://maps.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me;`,
   },
 ];
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
+  allowedDevOrigins: ["10.21.16.49", "localhost", "127.0.0.1"],
   async headers() {
     return [
       {
