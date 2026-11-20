@@ -14,6 +14,12 @@ const bookingLimiter = createRateLimiter({
   windowMs: 60_000,
 });
 
+/** 60-second server-side idempotency cache to prevent duplicate bookings on double-submit. */
+const recentBookings = new Map<
+  string,
+  { csn: string; bookingId: string | null; expiresAt: number }
+>();
+
 interface BookingRequestBody {
   senderName?: string;
   senderEmail?: string;
@@ -154,6 +160,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // ── Idempotency Guard (60s window for identical sender+pickup+destination) ──
+    const dedupeKey = [
+      senderContact.trim().replace(/\s+/g, ""),
+      collectionAddress.trim().toLowerCase(),
+      resolvedDestinationAddress.toLowerCase(),
+    ].join("|");
+    const existingBooking = recentBookings.get(dedupeKey);
+    if (existingBooking && now < existingBooking.expiresAt) {
+      return NextResponse.json({
+        success: true,
+        csn: existingBooking.csn,
+        bookingId: existingBooking.bookingId,
+        message: "Transfer scheduled successfully.",
+      });
+    }
+
     // ── Generate Unique CSN & Prepare Payload ─────────────────────────
     const csn = generateCSN();
     const sanitizedBooking = {
@@ -251,8 +273,15 @@ export async function POST(request: Request) {
       },
     ]);
 
+    // Cache booking for 60s idempotency window
+    recentBookings.set(dedupeKey, {
+      csn,
+      bookingId,
+      expiresAt: Date.now() + 60_000,
+    });
+
     // ── Tier 5: Non-blocking Staff Notification (Email / Webhook) ────
-    // Isolated in try/catch so email failure never blocks successful booking
+    // Isolated in try/catch with 3.5s timeout so email failure never blocks successful booking
     const resendApiKey = process.env.RESEND_API_KEY;
     const notificationEmail =
       process.env.NOTIFICATION_EMAIL_TO || "luminexlogisticsltd@gmail.com";
@@ -261,6 +290,7 @@ export async function POST(request: Request) {
       try {
         await fetch("https://api.resend.com/emails", {
           method: "POST",
+          signal: AbortSignal.timeout(3500),
           headers: {
             Authorization: `Bearer ${resendApiKey}`,
             "Content-Type": "application/json",

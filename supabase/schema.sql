@@ -60,13 +60,27 @@ CREATE TABLE IF NOT EXISTS public.inquiries (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- 5. Performance Indexes
+-- 5. Client Testimonials Table
+CREATE TABLE IF NOT EXISTS public.testimonials (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    csn VARCHAR(32),
+    author_name TEXT NOT NULL,
+    author_title TEXT NOT NULL,
+    rating INT NOT NULL DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
+    quote TEXT NOT NULL,
+    verified BOOLEAN NOT NULL DEFAULT false,
+    is_approved BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- 6. Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_bookings_csn ON public.bookings(csn);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON public.bookings(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tracking_events_csn ON public.tracking_events(csn);
 CREATE INDEX IF NOT EXISTS idx_tracking_events_booking_id ON public.tracking_events(booking_id);
 CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON public.inquiries(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_testimonials_approved_created ON public.testimonials(is_approved, created_at DESC);
 
 -- 6. Updated Timestamp Trigger Function
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -86,43 +100,48 @@ CREATE TRIGGER trigger_bookings_updated_at
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tracking_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
 -- 8. RLS Policies
 -- ─── Bookings ───────────────────────────────────────────────────────
--- Allow anyone to create a booking (public form submission)
-CREATE POLICY "Enable insert for public" ON public.bookings
-    FOR INSERT TO public WITH CHECK (true);
-
--- Allow public read ONLY by specific CSN (prevents mass data scraping)
--- The API route handler enforces this by querying .eq("csn", ...)
-CREATE POLICY "Enable read booking by CSN" ON public.bookings
-    FOR SELECT TO public USING (true);
-
--- Service role has full access for admin operations
+-- Service role has full access for server-side API route handlers
 CREATE POLICY "Service role full access to bookings" ON public.bookings
     FOR ALL TO service_role USING (true) WITH CHECK (true);
 
+-- Allow booking creation via server routes; block direct public table scraping of PII
+CREATE POLICY "Enable insert for public" ON public.bookings
+    FOR INSERT TO public WITH CHECK (true);
+
 -- ─── Tracking Events ────────────────────────────────────────────────
--- Allow public read of tracking events (filtered by CSN in API)
+-- Allow read of non-PII tracking milestones (filtered by CSN in /api/track/[csn])
 CREATE POLICY "Enable read tracking events" ON public.tracking_events
     FOR SELECT TO public USING (true);
 
--- Only service role can insert/update/delete tracking events
+-- Allow server routes to insert initial tracking event and service_role to manage all events
+CREATE POLICY "Enable insert initial tracking event" ON public.tracking_events
+    FOR INSERT TO public WITH CHECK (step_number = 1);
+
 CREATE POLICY "Service role manages tracking events" ON public.tracking_events
     FOR ALL TO service_role USING (true) WITH CHECK (true);
 
--- Block public from inserting tracking events directly
-CREATE POLICY "Deny public insert to tracking events" ON public.tracking_events
-    FOR INSERT TO public WITH CHECK (false);
-
 -- ─── Inquiries ──────────────────────────────────────────────────────
--- Allow public to submit contact inquiries
+-- Allow public to submit contact inquiries; only service_role can read
 CREATE POLICY "Enable insert for inquiries" ON public.inquiries
     FOR INSERT TO public WITH CHECK (true);
 
--- Only service role can read inquiries (admin dashboard)
 CREATE POLICY "Service role reads inquiries" ON public.inquiries
     FOR SELECT TO service_role USING (true);
+
+-- ─── Testimonials ───────────────────────────────────────────────────
+-- Allow reading approved testimonials and submitting new reviews via /api/testimonials
+CREATE POLICY "Enable read approved testimonials" ON public.testimonials
+    FOR SELECT TO public USING (is_approved = true);
+
+CREATE POLICY "Enable insert for testimonials" ON public.testimonials
+    FOR INSERT TO public WITH CHECK (rating >= 1 AND rating <= 5);
+
+CREATE POLICY "Service role full access to testimonials" ON public.testimonials
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 9. Seed Baseline Consignment for Demonstration / Testing
 INSERT INTO public.bookings (
@@ -139,7 +158,7 @@ INSERT INTO public.bookings (
     status,
     assigned_courier
 ) VALUES (
-    'LMX-GRA-8064',
+    'LMX-8F3K-92B4',
     'Ghana Revenue Authority - Large Taxpayer Office',
     'audit@gra.gov.gh',
     '+233 30 221 3400',
@@ -147,10 +166,10 @@ INSERT INTO public.bookings (
     'Zenith Legal Chambers (Attn: Lead Partner)',
     '+233 30 290 8471',
     'High Street Judicial Enclave, Accra',
-    'Certified Annual Corporate Tax Clearance Instruments (Sealed Tamper-Evident Pouch)',
+    'Certified Annual Corporate Tax Clearance Instruments',
     'national_id',
     'IN_TRANSIT',
-    'Agent K. Mensah'
+    'Agent K.'
 ) ON CONFLICT (csn) DO NOTHING;
 
 INSERT INTO public.tracking_events (
@@ -164,13 +183,13 @@ INSERT INTO public.tracking_events (
 )
 SELECT 
     id,
-    'LMX-GRA-8064',
+    'LMX-8F3K-92B4',
     1,
     'Accra HQ Intake',
-    'Document received and sealed in tamper-evident sleeve.',
+    'Received at our Accra office and sealed.',
     'completed',
     timezone('utc'::text, now() - INTERVAL '4 hours')
-FROM public.bookings WHERE csn = 'LMX-GRA-8064'
+FROM public.bookings WHERE csn = 'LMX-8F3K-92B4'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO public.tracking_events (
@@ -184,13 +203,13 @@ INSERT INTO public.tracking_events (
 )
 SELECT 
     id,
-    'LMX-GRA-8064',
+    'LMX-8F3K-92B4',
     2,
-    'Sorting Vault Transit',
-    'Cleared central security vault routing.',
+    'Accra Hub Sorting',
+    'Sorted at our Accra hub.',
     'completed',
     timezone('utc'::text, now() - INTERVAL '2 hours')
-FROM public.bookings WHERE csn = 'LMX-GRA-8064'
+FROM public.bookings WHERE csn = 'LMX-8F3K-92B4'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO public.tracking_events (
@@ -205,14 +224,14 @@ INSERT INTO public.tracking_events (
 )
 SELECT 
     id,
-    'LMX-GRA-8064',
+    'LMX-8F3K-92B4',
     3,
-    'Out for Secure Delivery',
-    'Consignment is in the custody of vetted courier en route to destination.',
+    'Out for Delivery',
+    'With your courier, on the way.',
     'in_progress',
-    'Agent K. Mensah',
+    'Agent K.',
     'National ID / Passport'
-FROM public.bookings WHERE csn = 'LMX-GRA-8064'
+FROM public.bookings WHERE csn = 'LMX-8F3K-92B4'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO public.tracking_events (
@@ -225,10 +244,10 @@ INSERT INTO public.tracking_events (
 )
 SELECT 
     id,
-    'LMX-GRA-8064',
+    'LMX-8F3K-92B4',
     4,
-    'Destination Verification',
-    'Awaiting final biometric signature and handover.',
+    'Destination Handover',
+    'Waiting for the recipient''s signature.',
     'pending'
-FROM public.bookings WHERE csn = 'LMX-GRA-8064'
+FROM public.bookings WHERE csn = 'LMX-8F3K-92B4'
 ON CONFLICT DO NOTHING;

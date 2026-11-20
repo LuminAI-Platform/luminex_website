@@ -77,29 +77,33 @@ export default function Team() {
       </div>
 
       {/* Leaders Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {LEADERS.map((leader) => (
           <div
             key={leader.name}
             className="bg-slate-50 border border-slate-200/80 rounded-xl p-5 sm:p-6 flex flex-col justify-between hover:shadow-md transition-all duration-200"
           >
             <div>
-              <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden border-2 border-white shadow-sm mb-4 sm:mb-5">
-                <Image
-                  src={leader.image}
-                  alt={`${leader.name} — ${leader.role}`}
-                  fill
-                  sizes="(max-width: 640px) 128px, 144px"
-                  className="object-cover object-top"
-                />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden border-2 border-white ring-1 ring-slate-200 shadow-sm shrink-0 bg-slate-200">
+                  <Image
+                    src={leader.image}
+                    alt={`${leader.name} — ${leader.role}`}
+                    fill
+                    sizes="(max-width: 640px) 112px, 128px"
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-navy-900 leading-snug">
+                    {leader.name}
+                  </h3>
+                  <p className="text-xs font-semibold text-brand-red-600 uppercase tracking-wider mt-1 leading-tight">
+                    {leader.role}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-navy-900 leading-tight">
-                {leader.name}
-              </h3>
-              <p className="text-xs font-semibold text-brand-red-600 uppercase tracking-wider mt-1 mb-3">
-                {leader.role}
-              </p>
-              <p className="text-slate-600 text-sm leading-relaxed">
+              <p className="text-slate-600 text-sm leading-relaxed border-t border-slate-200/70 pt-3.5">
                 {leader.bio}
               </p>
             </div>

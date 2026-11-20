@@ -114,7 +114,7 @@ export default function Services() {
 
             <div className="shrink-0 self-start md:self-center">
               <Link
-                href="/book"
+                href="/contact?intent=corporate#corporate-access"
                 className="inline-flex items-center gap-2 px-5 py-2.5 border border-navy-900 text-navy-900 hover:bg-navy-900 hover:text-white font-semibold text-sm rounded transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-navy-900 focus-visible:ring-offset-2"
               >
                 <span>Request Access</span>

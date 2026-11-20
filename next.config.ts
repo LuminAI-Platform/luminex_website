@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
+import os from "os";
 
 const isDev = process.env.NODE_ENV === "development";
+
+function getLocalDevOrigins(): string[] {
+  const origins = new Set<string>(["localhost", "127.0.0.1", "10.21.16.49"]);
+  try {
+    const interfaces = os.networkInterfaces();
+    for (const list of Object.values(interfaces)) {
+      for (const iface of list || []) {
+        if (iface.family === "IPv4" && iface.address) {
+          origins.add(iface.address);
+        }
+      }
+    }
+  } catch {
+    // Fallback to default origins
+  }
+  return Array.from(origins);
+}
 
 const securityHeaders = [
   {
@@ -40,7 +58,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
-  allowedDevOrigins: ["10.21.16.49", "localhost", "127.0.0.1"],
+  allowedDevOrigins: getLocalDevOrigins(),
   async headers() {
     return [
       {
