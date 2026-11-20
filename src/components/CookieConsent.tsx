@@ -23,27 +23,31 @@ export default function CookieConsent() {
 
   // Check for previously saved consent
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CONSENT_KEY);
+    const rafId = window.requestAnimationFrame(() => {
+      try {
+        const stored = localStorage.getItem(CONSENT_KEY);
 
-      if (stored) {
-        const parsed: StoredConsent = JSON.parse(stored);
+        if (stored) {
+          const parsed: StoredConsent = JSON.parse(stored);
 
-        if (
-          parsed.version === CONSENT_VERSION &&
-          (parsed.status === "accepted" ||
-            parsed.status === "essential-only")
-        ) {
-          setConsent(parsed.status);
-        } else {
-          localStorage.removeItem(CONSENT_KEY);
+          if (
+            parsed.version === CONSENT_VERSION &&
+            (parsed.status === "accepted" ||
+              parsed.status === "essential-only")
+          ) {
+            setConsent(parsed.status);
+          } else {
+            localStorage.removeItem(CONSENT_KEY);
+          }
         }
+      } catch {
+        setConsent(null);
+      } finally {
+        setIsHydrated(true);
       }
-    } catch {
-      setConsent(null);
-    } finally {
-      setIsHydrated(true);
-    }
+    });
+
+    return () => window.cancelAnimationFrame(rafId);
   }, []);
 
   // Slight delay before showing the banner

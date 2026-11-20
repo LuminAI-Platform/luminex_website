@@ -27,6 +27,7 @@ const NAV_LINKS = [
  * - Dual CTA buttons: "Track" (outlined) and "Book Courier" (filled)
  */
 export default function Navbar() {
+  "use no memo";
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [activeHash, setActiveHash] = useState("");
@@ -34,9 +35,6 @@ export default function Navbar() {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // ── Close drawer & reset hash on route change (render-time adjustment) ─
-  // React-recommended pattern: adjust state when props change during render
-  // instead of useEffect, avoiding cascading render cycles.
-  // See: https://react.dev/learn/you-might-not-need-an-effect#adjusting-state-when-a-prop-changes
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
     setIsOpen(false);
@@ -63,32 +61,22 @@ export default function Navbar() {
     if (pathname !== "/") return;
 
     let rafId: number | null = null;
+    let intersectionObserver: IntersectionObserver | null = null;
+    let mutationObserver: MutationObserver | null = null;
 
     const updateActiveSection = () => {
       rafId = null;
       const servicesEl = document.getElementById("services");
       if (!servicesEl) return;
 
-      const scrollTop = Math.max(
-        window.scrollY || 0,
-        document.documentElement.scrollTop || 0,
-        document.body.scrollTop || 0
-      );
-
-      // At the very top of the page, Home is always active unless user explicitly jumped to #services
-      if (scrollTop < 40 && window.location.hash !== "#services") {
-        setActiveHash("");
-        return;
-      }
-
       const rect = servicesEl.getBoundingClientRect();
-      // Activate Services as soon as Core Competencies enters the upper 60% of the viewport
-      const triggerY = Math.max(160, window.innerHeight * 0.6);
+      // Activate Services as soon as Core Competencies enters the upper 55% of the viewport
+      const triggerY = Math.max(140, window.innerHeight * 0.55);
 
       if (rect.top <= triggerY) {
-        setActiveHash("#services");
+        setActiveHash((prev) => (prev === "#services" ? prev : "#services"));
       } else {
-        setActiveHash("");
+        setActiveHash((prev) => (prev === "" ? prev : ""));
       }
     };
 
@@ -98,6 +86,38 @@ export default function Navbar() {
       }
     };
 
+    const attachObserver = () => {
+      const servicesEl = document.getElementById("services");
+      if (!servicesEl || intersectionObserver) return false;
+
+      intersectionObserver = new IntersectionObserver(
+        () => {
+          updateActiveSection();
+        },
+        {
+          root: null,
+          rootMargin: "-15% 0px -45% 0px",
+          threshold: [0, 0.05, 0.15, 0.3, 0.5, 0.75, 1],
+        }
+      );
+      intersectionObserver.observe(servicesEl);
+      return true;
+    };
+
+    if (!attachObserver()) {
+      mutationObserver = new MutationObserver(() => {
+        if (attachObserver()) {
+          mutationObserver?.disconnect();
+          mutationObserver = null;
+          scheduleUpdate();
+        }
+      });
+      mutationObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
     const handleHashChange = () => {
       if (window.location.hash === "#services") {
         setActiveHash("#services");
@@ -106,7 +126,6 @@ export default function Navbar() {
       }
     };
 
-    // Sync initial state (handles direct load on /#services and client-side return to /)
     if (window.location.hash === "#services") {
       rafId = window.requestAnimationFrame(() => {
         rafId = null;
@@ -116,12 +135,13 @@ export default function Navbar() {
       scheduleUpdate();
     }
 
-    // Listen on both window and document (capture) so scroll is caught regardless of scroll container
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
     document.addEventListener("scroll", scheduleUpdate, {
       passive: true,
       capture: true,
     });
+    window.addEventListener("wheel", scheduleUpdate, { passive: true });
+    window.addEventListener("touchmove", scheduleUpdate, { passive: true });
     window.addEventListener("resize", scheduleUpdate, { passive: true });
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("popstate", handleHashChange);
@@ -130,8 +150,12 @@ export default function Navbar() {
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
+      intersectionObserver?.disconnect();
+      mutationObserver?.disconnect();
       window.removeEventListener("scroll", scheduleUpdate);
       document.removeEventListener("scroll", scheduleUpdate, { capture: true });
+      window.removeEventListener("wheel", scheduleUpdate);
+      window.removeEventListener("touchmove", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("hashchange", handleHashChange);
       window.removeEventListener("popstate", handleHashChange);

@@ -11,6 +11,7 @@ import {
   ExternalLink,
   ShieldCheck,
   UserCheck,
+  ArrowRight,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -433,11 +434,14 @@ export function ContactForm() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                 <span>Scheduling Delivery…</span>
               </>
             ) : (
-              <span>Submit Delivery Request ▷</span>
+              <>
+                <span>Submit Delivery Request</span>
+                <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </>
             )}
           </button>
         </div>
