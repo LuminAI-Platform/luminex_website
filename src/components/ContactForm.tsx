@@ -205,7 +205,7 @@ export function ContactForm() {
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             Message our{" "}
             <span className="text-emerald-300 font-semibold">Head of Operations</span>{" "}
-            (<span className="font-mono text-white">{HEAD_OF_OPS_PHONE}</span>) directly to confirm pickup and arrange payment.
+            (<span className="font-mono text-white whitespace-nowrap">{HEAD_OF_OPS_PHONE}</span>) directly to confirm pickup and arrange payment.
           </p>
         </div>
 
@@ -456,7 +456,7 @@ export function ContactForm() {
             Need urgent same-hour dispatch? Call or WhatsApp{" "}
             <a
               href={`tel:${HEAD_OF_OPS_PHONE.replace(/\s+/g, "")}`}
-              className="text-brand-red-600 font-bold hover:underline"
+              className="text-brand-red-600 font-bold hover:underline whitespace-nowrap"
             >
               {HEAD_OF_OPS_PHONE}
             </a>
@@ -518,7 +518,7 @@ export function ContactForm() {
                 Next Step: Ops Confirmation & Payment
               </p>
               <p className="text-emerald-800 leading-relaxed text-[11px]">
-                Our <strong>Head of Operations</strong> ({HEAD_OF_OPS_PHONE}) will contact you shortly to confirm your booking and agree on your preferred payment method.
+                Our <strong>Head of Operations</strong> (<span className="whitespace-nowrap">{HEAD_OF_OPS_PHONE}</span>) will contact you shortly to confirm your booking and agree on your preferred payment method.
               </p>
             </div>
 
