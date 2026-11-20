@@ -70,17 +70,23 @@ export function ContactForm() {
   const [formData, setFormData] = useState<BookingFormData>(INITIAL_FORM_DATA);
   const [honeypot, setHoneypot] = useState("");
   const renderedAtRef = useRef<number | null>(null);
+  const submittingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [generatedCSN, setGeneratedCSN] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     renderedAtRef.current = Date.now();
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, []);
 
   /** Update a single form field by key. */
   const updateField = (key: keyof BookingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+    if (errorMessage) setErrorMessage(null);
   };
 
   /** Direct WhatsApp template for quick booking */
@@ -92,9 +98,22 @@ export function ContactForm() {
     `• Verification ID Type (Ghana Card / Passport): `
   )}`;
 
-  /** Handle form submission with live backend Route Handler. */
+  /** Handle form submission with synchronous double-click guard & timeout. */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    let timedOut = false;
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 8000);
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -104,6 +123,7 @@ export function ContactForm() {
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
         body: JSON.stringify({
           ...formData,
           receiverName: formData.receiverName || formData.senderName,
@@ -115,15 +135,26 @@ export function ContactForm() {
         }),
       });
 
-      const data = await response.json();
+      let data: { csn?: string; error?: string } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
-      if (!response.ok) {
-        throw new Error(data.error || "Unable to submit booking. Please try again.");
+      if (!response.ok || !data?.csn) {
+        throw new Error(data?.error || "Unable to submit booking. Please try again.");
       }
 
       setGeneratedCSN(data.csn);
     } catch (err: unknown) {
-      if (err instanceof Error) {
+      if (timedOut) {
+        setErrorMessage(
+          "The request took longer than expected. Please check your connection or use the WhatsApp button above."
+        );
+      } else if (err instanceof Error && err.name === "AbortError") {
+        return;
+      } else if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
         setErrorMessage(
@@ -131,6 +162,8 @@ export function ContactForm() {
         );
       }
     } finally {
+      window.clearTimeout(timeoutId);
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -147,7 +180,7 @@ export function ContactForm() {
       `Hello Head of Operations, I have submitted a delivery booking on the Luminex website:\n\n` +
       `• Tracking CSN: ${generatedCSN}\n` +
       `• Full Name: ${formData.senderName}\n` +
-      `• Phone Number: ${formData.senderContact}\n` +
+      `• Phone: ${formData.senderContact}\n` +
       `• Pickup Address: ${formData.collectionAddress}\n` +
       `• Destination: ${formData.destinationAddress || formData.collectionAddress}\n` +
       `• Verification ID: ${formData.verificationProtocol.replace("_", " ").toUpperCase()}\n\n` +
@@ -156,21 +189,23 @@ export function ContactForm() {
     : directWhatsAppUrl;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* ── Direct WhatsApp Fast-Track Callout ─────────────────── */}
-      <div className="bg-gradient-to-r from-emerald-900 to-navy-950 text-white rounded-2xl p-6 sm:p-8 shadow-md border border-emerald-800/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2 max-w-xl">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
-            <MessageSquareText className="w-3.5 h-3.5" />
-            Fastest Booking Method
+      <div className="bg-gradient-to-r from-emerald-900 to-navy-950 text-white rounded-2xl p-4 sm:p-6 shadow-md border border-emerald-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border border-emerald-500/30">
+              <MessageSquareText className="w-3 h-3" aria-hidden="true" />
+              Fastest Option
+            </span>
+            <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
+              Book Instantly via WhatsApp
+            </h2>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Book Instantly via WhatsApp
-          </h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            All new deliveries are coordinated directly by our{" "}
+            Message our{" "}
             <span className="text-emerald-300 font-semibold">Head of Operations</span>{" "}
-            (<span className="font-mono text-white">{HEAD_OF_OPS_PHONE}</span>). He will coordinate with the fleet manager, confirm your pickup, and arrange payment at your convenience.
+            (<span className="font-mono text-white">{HEAD_OF_OPS_PHONE}</span>) directly to confirm pickup and arrange payment.
           </p>
         </div>
 
@@ -178,11 +213,11 @@ export function ContactForm() {
           href={directWhatsAppUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2.5 bg-emerald-500 hover:bg-emerald-400 text-navy-950 font-bold px-6 py-3.5 rounded-xl text-sm transition-all duration-200 shadow-md hover:shadow-lg shrink-0 group"
+          className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-navy-950 font-bold px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition-all duration-200 shadow-sm hover:shadow-md shrink-0 group"
         >
-          <MessageSquareText className="w-5 h-5 text-navy-950" />
+          <MessageSquareText className="w-4 h-4 text-navy-950" aria-hidden="true" />
           <span>Chat on WhatsApp</span>
-          <ExternalLink className="w-4 h-4 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
         </a>
       </div>
 

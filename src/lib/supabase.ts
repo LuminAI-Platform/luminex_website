@@ -4,6 +4,10 @@
  * even when Supabase environment variables are not configured.
  */
 
+import fs from "fs";
+import os from "os";
+import path from "path";
+
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -18,23 +22,117 @@ export interface LocalTimelineStep {
   requiredId?: string;
 }
 
-const globalForConsignments = globalThis as unknown as {
-  __luminex_local_consignments?: Map<string, LocalTimelineStep[]>;
+export interface LocalTestimonialRecord {
+  id: string;
+  rating: number;
+  quote: string;
+  author: string;
+  title: string;
+  verified?: boolean;
+  kind?: "verified_delivery" | "client_review" | "featured_partner";
+  createdAt?: string;
+}
+
+interface LocalStoreData {
+  consignments: Record<string, LocalTimelineStep[]>;
+  testimonials: LocalTestimonialRecord[];
+}
+
+const LOCAL_STORE_DIR =
+  process.env.NODE_ENV === "production"
+    ? os.tmpdir()
+    : path.join(process.cwd(), ".data");
+const LOCAL_STORE_FILE = path.join(LOCAL_STORE_DIR, "local-store.json");
+
+const globalForStore = globalThis as unknown as {
+  __luminex_fallback_store?: LocalStoreData;
 };
 
-function getLocalStore(): Map<string, LocalTimelineStep[]> {
-  if (!globalForConsignments.__luminex_local_consignments) {
-    globalForConsignments.__luminex_local_consignments = new Map();
+function getMemoryStore(): LocalStoreData {
+  if (!globalForStore.__luminex_fallback_store) {
+    globalForStore.__luminex_fallback_store = {
+      consignments: {},
+      testimonials: [],
+    };
   }
-  return globalForConsignments.__luminex_local_consignments;
+  return globalForStore.__luminex_fallback_store;
+}
+
+function readLocalStore(): LocalStoreData {
+  const mem = getMemoryStore();
+  try {
+    if (fs.existsSync(LOCAL_STORE_FILE)) {
+      const raw = fs.readFileSync(LOCAL_STORE_FILE, "utf8");
+      const parsed = JSON.parse(raw) as Partial<LocalStoreData>;
+      const consignments = {
+        ...mem.consignments,
+        ...(parsed.consignments && typeof parsed.consignments === "object"
+          ? parsed.consignments
+          : {}),
+      };
+      const fileTestimonials = Array.isArray(parsed.testimonials)
+        ? parsed.testimonials
+        : [];
+      const seen = new Set<string>();
+      const mergedTestimonials: LocalTestimonialRecord[] = [];
+      for (const item of [...mem.testimonials, ...fileTestimonials]) {
+        const key = `${item.author.toLowerCase()}::${item.quote.toLowerCase()}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          mergedTestimonials.push(item);
+        }
+      }
+      mem.consignments = consignments;
+      mem.testimonials = mergedTestimonials;
+      return { consignments, testimonials: mergedTestimonials };
+    }
+  } catch (err) {
+    console.warn("[Fallback Store Read Warning]:", err);
+  }
+  return mem;
+}
+
+function writeLocalStore(data: LocalStoreData): void {
+  const mem = getMemoryStore();
+  mem.consignments = data.consignments;
+  mem.testimonials = data.testimonials;
+  try {
+    if (!fs.existsSync(LOCAL_STORE_DIR)) {
+      fs.mkdirSync(LOCAL_STORE_DIR, { recursive: true });
+    }
+    fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.warn("[Fallback Store Disk Write Warning - using memory mirror]:", err);
+  }
 }
 
 export function saveLocalConsignment(csn: string, steps: LocalTimelineStep[]): void {
-  getLocalStore().set(csn.trim().toUpperCase(), steps);
+  const normalized = csn.trim().toUpperCase();
+  const store = readLocalStore();
+  store.consignments[normalized] = steps;
+  writeLocalStore(store);
 }
 
 export function getLocalConsignment(csn: string): LocalTimelineStep[] | undefined {
-  return getLocalStore().get(csn.trim().toUpperCase());
+  const normalized = csn.trim().toUpperCase();
+  const store = readLocalStore();
+  return store.consignments[normalized];
+}
+
+export function getLocalTestimonials(): LocalTestimonialRecord[] {
+  return readLocalStore().testimonials;
+}
+
+export function saveLocalTestimonial(item: LocalTestimonialRecord): void {
+  const store = readLocalStore();
+  const duplicateKey = `${item.author.toLowerCase()}::${item.quote.toLowerCase()}`;
+  const filtered = store.testimonials.filter(
+    (existing) =>
+      `${existing.author.toLowerCase()}::${existing.quote.toLowerCase()}` !==
+      duplicateKey
+  );
+  store.testimonials = [item, ...filtered].slice(0, 20);
+  writeLocalStore(store);
 }
 
 /**

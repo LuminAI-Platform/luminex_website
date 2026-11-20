@@ -513,7 +513,7 @@ export default function PrivacyPage() {
           </section>
 
           {/* Section 12: Cookies, Marketing & Minors */}
-          <section id="cookies" className="space-y-3">
+          <section id="cookies" className="space-y-3 scroll-mt-24">
             <h2 className="text-lg sm:text-xl font-bold text-navy-900 flex items-center gap-2.5 border-b border-slate-100 pb-3">
               <Globe className="w-5 h-5 text-brand-red-500 shrink-0" />
               12. Cookies, Marketing & Minors

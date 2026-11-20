@@ -77,6 +77,9 @@ export default function CookieConsent() {
         CONSENT_KEY,
         JSON.stringify(consentData)
       );
+      window.dispatchEvent(
+        new CustomEvent("lmx:cookie-consent", { detail: consentData })
+      );
     } catch {
       // Continue for the current session if storage fails.
     }
@@ -159,15 +162,36 @@ export default function CookieConsent() {
 
           {/* Message */}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-sm font-semibold text-white sm:text-[15px]">
                 We use cookies
               </h2>
 
               <span
                 aria-hidden="true"
-                className="hidden h-1 w-1 rounded-full bg-slate-500 sm:block"
+                className="h-1 w-1 rounded-full bg-slate-500"
               />
+
+              <Link
+                href="/privacy#cookies"
+                className="
+                  inline-flex
+                  text-xs
+                  font-medium
+                  text-brand-red-400
+                  underline
+                  underline-offset-2
+                  transition-colors
+                  hover:text-brand-red-300
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-brand-red-400
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-navy-950
+                "
+              >
+                Privacy Policy
+              </Link>
             </div>
 
             <p
@@ -185,36 +209,15 @@ export default function CookieConsent() {
               Optional analytics cookies help us understand usage and
               improve our services.
             </p>
-
-            <Link
-              href="/privacy#cookies"
-              className="
-                mt-1.5
-                inline-flex
-                text-xs
-                font-medium
-                text-brand-red-400
-                underline
-                underline-offset-2
-                transition-colors
-                hover:text-brand-red-300
-                focus-visible:outline-none
-                focus-visible:ring-2
-                focus-visible:ring-brand-red-400
-                focus-visible:ring-offset-2
-                focus-visible:ring-offset-navy-950
-              "
-            >
-              Privacy Policy
-            </Link>
           </div>
 
           {/* Actions */}
           <div
             className="
-              flex shrink-0
-              flex-col gap-2
-              sm:flex-row
+              grid grid-cols-2
+              shrink-0
+              gap-2
+              sm:flex sm:flex-row
               lg:items-center
             "
           >
