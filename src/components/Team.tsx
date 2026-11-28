@@ -127,13 +127,13 @@ export default function Team() {
     <div className="max-w-6xl mx-auto">
       {/* Section Header */}
       <div className="mb-10 sm:mb-12">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-          <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-            Executive Leadership &amp; Advisory
-          </h2>
-        </div>
-        <p className="text-slate-500 max-w-2xl pl-4 text-base leading-relaxed">
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+          Leadership &amp; Advisory
+        </p>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+          Executive Leadership &amp; Advisory
+        </h2>
+        <p className="mt-3 text-slate-600 max-w-[58ch] text-sm sm:text-base leading-relaxed">
           Led by seasoned industry practitioners dedicated to institutional
           security, strict compliance, and flawless logistical precision across
           Ghana.

@@ -78,13 +78,13 @@ export default function Services() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-10 sm:mb-12">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-            <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-              Core Competencies
-            </h2>
-          </div>
-          <p className="mt-3 text-slate-500 text-base md:text-lg max-w-2xl pl-4.5 leading-relaxed">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+            Core Competencies
+          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+            Engineered Custody Protocols
+          </h2>
+          <p className="mt-3 text-slate-600 text-sm sm:text-base max-w-[58ch] leading-relaxed">
             Rigorous protocols applied to every tier of logistics, ensuring
             confidentiality and precision for specialized deliveries.
           </p>

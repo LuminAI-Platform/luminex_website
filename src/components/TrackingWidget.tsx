@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   CheckCircle2,
   Truck,
@@ -108,19 +108,13 @@ export function TrackingWidget() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
   /** Cancel any in-flight lookup safely. */
-  const cancelInFlight = () => {
+  const cancelInFlight = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-  };
+  }, []);
 
   /** Close the sample preview without disturbing the user's input box. */
   const handleCloseSample = () => {
@@ -146,105 +140,121 @@ export function TrackingWidget() {
   };
 
   /** Fetch tracking timeline from backend API with timeout & race-condition protection. */
-  const fetchTrackingData = async (csn: string) => {
-    const trimmedCSN = csn.trim().toUpperCase();
-    if (!trimmedCSN) {
-      cancelInFlight();
-      setIsLoading(false);
-      setActiveData(null);
-      setActiveCSN("");
-      setIsSample(false);
-      setErrorMessage(
-        "Please enter your Consignment Security Number (CSN) to track your document."
-      );
-      return;
-    }
-
-    cancelInFlight();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    let timedOut = false;
-    const timeoutId = window.setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, 6500);
-
-    setIsLoading(true);
-    setErrorMessage(null);
-    // If sample preview was open, dismiss it immediately so live tracking feels crisp
-    if (isSample) {
-      setIsSample(false);
-      setActiveData(null);
-      setActiveCSN("");
-    }
-
-    try {
-      const response = await fetch(
-        `/api/track/${encodeURIComponent(trimmedCSN)}`,
-        { signal: controller.signal }
-      );
-
-      let data: {
-        csn?: string;
-        steps?: TimelineStep[];
-        isSample?: boolean;
-        error?: string;
-      } | null = null;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (controller.signal.aborted) return;
-
-      if (!response.ok || !data) {
-        throw new Error(
-          data?.error ||
-            `We couldn't find a consignment matching CSN "${trimmedCSN}". Please check the number and try again.`
+  const fetchTrackingData = useCallback(
+    async (csn: string) => {
+      const trimmedCSN = csn.trim().toUpperCase();
+      if (!trimmedCSN) {
+        cancelInFlight();
+        setIsLoading(false);
+        setActiveData(null);
+        setActiveCSN("");
+        setIsSample(false);
+        setErrorMessage(
+          "Please enter your Consignment Security Number (CSN) to track your document."
         );
-      }
-
-      const steps: TimelineStep[] = data.steps ?? [];
-      if (steps.length === 0) {
-        throw new Error(
-          `We couldn't find a consignment matching CSN "${trimmedCSN}". Please check the number and try again.`
-        );
-      }
-
-      setActiveData(steps);
-      setActiveCSN(data.csn || trimmedCSN);
-      setIsSample(Boolean(data.isSample));
-    } catch (err: unknown) {
-      // Ignore silent aborts triggered when the user starts a newer action
-      if (err instanceof Error && err.name === "AbortError" && !timedOut) {
         return;
       }
 
+      cancelInFlight();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      let timedOut = false;
+      const timeoutId = window.setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, 6500);
+
+      setIsLoading(true);
+      setErrorMessage(null);
+      setIsSample(false);
       setActiveData(null);
       setActiveCSN("");
-      setIsSample(false);
 
-      if (timedOut) {
-        setErrorMessage(
-          "The lookup took longer than expected. Please check your connection and try again."
+      try {
+        const response = await fetch(
+          `/api/track/${encodeURIComponent(trimmedCSN)}`,
+          { signal: controller.signal }
         );
-      } else if (err instanceof Error) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage(
-          "Something went wrong while checking your consignment. Please try again in a moment."
-        );
+
+        let data: {
+          csn?: string;
+          steps?: TimelineStep[];
+          isSample?: boolean;
+          error?: string;
+        } | null = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+
+        if (controller.signal.aborted) return;
+
+        if (!response.ok || !data) {
+          throw new Error(
+            data?.error ||
+              `We couldn't find a consignment matching CSN "${trimmedCSN}". Please check the number and try again.`
+          );
+        }
+
+        const steps: TimelineStep[] = data.steps ?? [];
+        if (steps.length === 0) {
+          throw new Error(
+            `We couldn't find a consignment matching CSN "${trimmedCSN}". Please check the number and try again.`
+          );
+        }
+
+        setActiveData(steps);
+        setActiveCSN(data.csn || trimmedCSN);
+        setIsSample(Boolean(data.isSample));
+      } catch (err: unknown) {
+        // Ignore silent aborts triggered when the user starts a newer action
+        if (err instanceof Error && err.name === "AbortError" && !timedOut) {
+          return;
+        }
+
+        setActiveData(null);
+        setActiveCSN("");
+        setIsSample(false);
+
+        if (timedOut) {
+          setErrorMessage(
+            "The lookup took longer than expected. Please check your connection and try again."
+          );
+        } else if (err instanceof Error) {
+          setErrorMessage(err.message);
+        } else {
+          setErrorMessage(
+            "Something went wrong while checking your consignment. Please try again in a moment."
+          );
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
+          setIsLoading(false);
+        }
       }
-    } finally {
-      window.clearTimeout(timeoutId);
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
-        setIsLoading(false);
-      }
+    },
+    [cancelInFlight]
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialCsn = params.get("csn")?.trim();
+    let rafId: number | null = null;
+    if (initialCsn) {
+      rafId = window.requestAnimationFrame(() => {
+        setCsnQuery(initialCsn.toUpperCase());
+        fetchTrackingData(initialCsn);
+      });
     }
-  };
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      cancelInFlight();
+    };
+  }, [fetchTrackingData, cancelInFlight]);
 
   /** Handle CSN search form submit. */
   const handleSearch = (e: React.FormEvent) => {
@@ -256,13 +266,15 @@ export function TrackingWidget() {
     <div className="space-y-6">
       {/* ── Search Card ──────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden shadow-sm border border-slate-200">
-        <div className="bg-navy-950 p-4 sm:p-6 md:p-8 text-white">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black mb-1">
+        <div className="bg-navy-950 p-5 sm:p-6 md:p-8 text-white">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-400 mb-2">
+            Live Custody Lookup
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-[-0.025em] mb-1.5">
             Secure Document Tracking
           </h1>
-          <p className="text-slate-300 text-sm md:text-base">
-            Enter your Consignment Security Number (CSN) to see where your
-            document is.
+          <p className="text-slate-300 text-sm md:text-base max-w-[58ch]">
+            Enter your Consignment Security Number (CSN) to view live chain-of-custody milestones.
           </p>
         </div>
 

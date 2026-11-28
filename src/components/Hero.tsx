@@ -1,59 +1,42 @@
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { Truck } from "lucide-react";
+import HeroQuickTrack from "@/components/HeroQuickTrack";
 
 /**
  * Homepage hero section.
  *
- * Full-viewport banner with background image overlay,
- * headline, subtitle, and dual CTA buttons (Track / Book).
- * Uses `next/image` for optimized background loading.
+ * Banner with radial-vignetted background image, headline, subtitle,
+ * and an instant inline CSN lookup bar paired with pickup & corporate CTAs.
  */
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[60vh] md:min-h-[70vh] flex items-center justify-center bg-navy-950 text-white overflow-hidden py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
-      {/* Background Image — optimized via next/image (GPU-composited grayscale instead of CPU mix-blend) */}
+    <section className="relative w-full min-h-[58vh] md:min-h-[66vh] flex items-center justify-center bg-navy-950 text-white overflow-hidden py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+      {/* Background Image — optimized via next/image */}
       <Image
         src="/hero-fold.jpg"
         alt=""
         fill
         sizes="100vw"
         priority
-        className="object-cover object-center opacity-40 grayscale"
+        className="object-cover object-center opacity-35"
       />
 
-      {/* Dark Gradient Overlay for readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-900/60" />
+      {/* Radial Dark Vignette so center headline stays razor-sharp */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(4,13,26,0.92)_0%,rgba(4,13,26,0.74)_55%,rgba(4,13,26,0.88)_100%)]" />
 
       {/* Hero Content */}
       <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight sm:leading-tight md:leading-none max-w-3xl mb-5 sm:mb-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold tracking-[-0.025em] text-white leading-tight sm:leading-[1.12] max-w-3xl mb-5">
           Secure Document Delivery Across Ghana
         </h1>
 
-        <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed mb-8 sm:mb-10">
+        <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl font-normal leading-relaxed mb-8 sm:mb-9">
           Institutional-grade logistics engineered for high-value legal,
           corporate, and government documentation. Precision execution,
-          guaranteed chain of custody.
+          verified chain of custody.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md">
-          <Link
-            href="/track"
-            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center gap-2.5 px-6 py-3 sm:py-3.5 bg-brand-red-500 hover:bg-brand-red-600 text-white font-bold text-sm rounded shadow-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
-          >
-            <Truck className="w-5 h-5 shrink-0" />
-            <span>Track Shipment</span>
-          </Link>
-
-          <Link
-            href="/book"
-            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center px-6 py-3 sm:py-3.5 bg-navy-900/90 hover:bg-navy-800 border border-slate-600 hover:border-slate-400 text-white font-semibold text-sm rounded transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
-          >
-            Book Services
-          </Link>
-        </div>
+        <HeroQuickTrack />
       </div>
     </section>
   );

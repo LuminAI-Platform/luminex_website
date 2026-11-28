@@ -296,8 +296,8 @@ export default function Testimonials() {
 
   return (
     <section
-      id="operations"
-      className="bg-slate-50 py-16 md:py-24 border-t border-slate-100"
+      id="testimonials"
+      className="bg-slate-50 py-16 md:py-24 border-t border-slate-200/80"
     >
       {/* Top-Center Auto-Dismissing Confirmation Pop-up */}
       {successMessage && (
@@ -327,13 +327,13 @@ export default function Testimonials() {
         {/* Section Header */}
         <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-              <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-                Trust from Ghana&apos;s Leading Institutions
-              </h2>
-            </div>
-            <p className="text-slate-500 max-w-2xl pl-4.5 text-base leading-relaxed">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+              Institutional Trust
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+              Trusted by Ghana&apos;s Leading Institutions
+            </h2>
+            <p className="mt-3 text-slate-600 max-w-[58ch] text-sm sm:text-base leading-relaxed">
               Our commitment to security and precision has made us the preferred
               logistics partner for the nation&apos;s most demanding sectors.
             </p>

@@ -27,20 +27,18 @@ const INITIAL_FORM_DATA: InquiryFormData = {
   fullName: "",
   email: "",
   phone: "",
-  subject: "Enterprise Account",
+  subject: "",
   organization: "",
-  estimatedVolume: "25–100 consignments / month",
+  estimatedVolume: "",
   message: "",
 };
 
 const SUBJECT_OPTIONS = [
-  {
-    value: "Enterprise Account",
-    label: "Corporate Portal & Account Access",
-  },
-  { value: "Consignment Query", label: "Consignment Tracking Issue" },
-  { value: "Refund or Billing", label: "Refund or Billing Request" },
-  { value: "General Support", label: "General Support" },
+  { value: "Enterprise Account", label: "Corporate portal access" },
+  { value: "Dedicated Dispatch", label: "Dedicated dispatch" },
+  { value: "Consignment Query", label: "Consignment tracking" },
+  { value: "Refund or Billing", label: "Billing or refund enquiry" },
+  { value: "General Support", label: "General enquiry" },
 ] as const;
 
 const VOLUME_OPTIONS = [
@@ -52,14 +50,17 @@ const VOLUME_OPTIONS = [
 // ── Shared Styles ────────────────────────────────────────────────────
 
 const INPUT_CLASS =
-  "w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900 transition-shadow";
+  "w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900 transition-shadow bg-white";
+
+const SELECT_CLASS =
+  "w-full appearance-none border border-slate-300 rounded-lg pl-4 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 focus:border-navy-900 transition-shadow bg-white cursor-pointer";
 
 // ── Component ────────────────────────────────────────────────────────
 
 /**
  * Contact & Corporate Access Request form with built-in multi-tier spam protection:
- * - Dedicated Corporate Portal & Account Onboarding mode when "Enterprise Account" is active
- * - Invisible honeypot trap + mount timing heuristic
+ * - Preselects Corporate Portal mode only when navigated with `?intent=corporate`
+ * - Leaves Request Type & Volume unselected with explicit placeholders otherwise
  * - Synchronous double-click lock & 8s network timeout
  */
 export default function ContactInquiryForm() {
@@ -72,29 +73,27 @@ export default function ContactInquiryForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   const isCorporateRequest = formData.subject === "Enterprise Account";
 
   useEffect(() => {
     renderedAtRef.current = Date.now();
+    // Preselect Corporate Portal mode only when arriving from "Request Access" (?intent=corporate)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("intent") === "corporate") {
+      const rafId = window.requestAnimationFrame(() => {
+        setFormData((prev) =>
+          prev.subject ? prev : { ...prev, subject: "Enterprise Account" }
+        );
+      });
+      return () => {
+        window.cancelAnimationFrame(rafId);
+        abortControllerRef.current?.abort();
+      };
+    }
+
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /** Update a single form field by key. */
@@ -107,6 +106,17 @@ export default function ContactInquiryForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current) return;
+
+    if (!formData.subject) {
+      setErrorMessage("Please select a request type.");
+      return;
+    }
+
+    if (isCorporateRequest && !formData.estimatedVolume) {
+      setErrorMessage("Please select an estimated monthly volume.");
+      return;
+    }
+
     submittingRef.current = true;
 
     abortControllerRef.current?.abort();
@@ -179,10 +189,6 @@ export default function ContactInquiryForm() {
     }
   };
 
-  const selectedLabel =
-    SUBJECT_OPTIONS.find((opt) => opt.value === formData.subject)?.label ||
-    "Select inquiry subject";
-
   // ── Success State ──────────────────────────────────────────────────
   if (submitted) {
     return (
@@ -193,9 +199,9 @@ export default function ContactInquiryForm() {
         <div className="w-12 h-12 bg-brand-red-50 rounded-full flex items-center justify-center text-brand-red-500 mx-auto mb-4">
           <Send className="w-6 h-6" aria-hidden="true" />
         </div>
-        <h3 className="text-xl font-bold text-navy-900 mb-2">
+        <h2 className="text-xl font-semibold text-navy-900 mb-2">
           {isCorporateRequest ? "Request Received" : "Inquiry Received"}
-        </h3>
+        </h2>
         <p className="text-slate-600 text-sm max-w-md mx-auto leading-relaxed">
           {isCorporateRequest
             ? "Thank you for your interest in Luminex Corporate Logistics. Your access request has been received. Our team will review your organisation's requirements and contact you regarding the next steps."
@@ -208,7 +214,7 @@ export default function ContactInquiryForm() {
             setFormData(INITIAL_FORM_DATA);
             renderedAtRef.current = Date.now();
           }}
-          className="mt-6 text-xs text-brand-red-500 font-bold uppercase tracking-wider underline cursor-pointer hover:text-brand-red-600 transition-colors"
+          className="mt-6 text-xs text-brand-red-600 font-semibold uppercase tracking-wider underline cursor-pointer hover:text-brand-red-700 transition-colors"
         >
           {isCorporateRequest
             ? "Submit another request"
@@ -225,8 +231,8 @@ export default function ContactInquiryForm() {
       className="bg-white border border-slate-200 rounded-xl p-5 sm:p-6 md:p-8 shadow-xs scroll-mt-24"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="border-b border-slate-100 pb-3 mb-4">
-          <h2 className="text-xl font-bold text-navy-900 flex items-center gap-2">
+        <div className="border-b border-slate-100 pb-3.5 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-navy-900 flex items-center gap-2">
             {isCorporateRequest ? (
               <Building2
                 className="w-5 h-5 text-brand-red-500 shrink-0"
@@ -240,7 +246,7 @@ export default function ContactInquiryForm() {
             )}
             {isCorporateRequest
               ? "Corporate Portal & Account Access Request"
-              : "Dispatch Inquiry Form"}
+              : "Send Us a Message"}
           </h2>
           {isCorporateRequest && (
             <p className="text-xs text-slate-500 mt-1">
@@ -281,46 +287,41 @@ export default function ContactInquiryForm() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-          <div className="relative" ref={dropdownRef}>
-            <label className="block text-xs font-bold text-navy-900 uppercase tracking-wider mb-2">
-              Request Type
-            </label>
-
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              aria-expanded={isDropdownOpen}
-              className={`${INPUT_CLASS} bg-white cursor-pointer w-full flex items-center justify-between text-left`}
+          <div>
+            <label
+              htmlFor="inquirySubject"
+              className="block text-xs font-bold text-navy-900 uppercase tracking-wider mb-2"
             >
-              <span className="truncate">{selectedLabel}</span>
-              <ChevronDown
-                aria-hidden="true"
-                className={`w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0 ${
-                  isDropdownOpen ? "rotate-180" : ""
+              Request Type *
+            </label>
+            <div className="relative">
+              <select
+                id="inquirySubject"
+                required
+                value={formData.subject}
+                onChange={(e) => updateField("subject", e.target.value)}
+                className={`${SELECT_CLASS} ${
+                  formData.subject ? "text-slate-900" : "text-slate-400"
                 }`}
-              />
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+              >
+                <option value="" disabled>
+                  Select a request type
+                </option>
                 {SUBJECT_OPTIONS.map((opt) => (
-                  <div
+                  <option
                     key={opt.value}
-                    onClick={() => {
-                      updateField("subject", opt.value);
-                      setIsDropdownOpen(false);
-                    }}
-                    className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${
-                      formData.subject === opt.value
-                        ? "bg-slate-100 text-navy-900 font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                    value={opt.value}
+                    className="text-slate-900"
                   >
                     {opt.label}
-                  </div>
+                  </option>
                 ))}
-              </div>
-            )}
+              </select>
+              <ChevronDown
+                aria-hidden="true"
+                className="w-4 h-4 text-slate-500 pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+              />
+            </div>
           </div>
 
           <div>
@@ -367,20 +368,32 @@ export default function ContactInquiryForm() {
                 htmlFor="inquiryVolume"
                 className="block text-xs font-bold text-navy-900 uppercase tracking-wider mb-2"
               >
-                Estimated Monthly Volume
+                Estimated Monthly Volume *
               </label>
-              <select
-                id="inquiryVolume"
-                value={formData.estimatedVolume}
-                onChange={(e) => updateField("estimatedVolume", e.target.value)}
-                className={`${INPUT_CLASS} bg-white cursor-pointer`}
-              >
-                {VOLUME_OPTIONS.map((vol) => (
-                  <option key={vol} value={vol}>
-                    {vol}
+              <div className="relative">
+                <select
+                  id="inquiryVolume"
+                  required={isCorporateRequest}
+                  value={formData.estimatedVolume}
+                  onChange={(e) => updateField("estimatedVolume", e.target.value)}
+                  className={`${SELECT_CLASS} ${
+                    formData.estimatedVolume ? "text-slate-900" : "text-slate-400"
+                  }`}
+                >
+                  <option value="" disabled>
+                    Select monthly volume
                   </option>
-                ))}
-              </select>
+                  {VOLUME_OPTIONS.map((vol) => (
+                    <option key={vol} value={vol} className="text-slate-900">
+                      {vol}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="w-4 h-4 text-slate-500 pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -462,7 +475,7 @@ export default function ContactInquiryForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-brand-red-500 hover:bg-brand-red-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 sm:px-8 py-3 rounded-lg shadow-xs transition-all duration-200 cursor-pointer w-full md:w-auto focus-visible:ring-2 focus-visible:ring-brand-red-500 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+          className="bg-brand-red-500 hover:bg-brand-red-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 sm:px-8 py-3 rounded-lg shadow-xs transition-colors duration-200 cursor-pointer w-full md:w-auto focus-visible:ring-2 focus-visible:ring-brand-red-500 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             <>

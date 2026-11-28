@@ -2,6 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { ShieldCheck, Award, FileCheck, MapPin, Building2, Clock } from "lucide-react";
 import Team from "@/components/Team";
+import { SITE_CONFIG } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "About Us | Luminex Logistics — Ghana's Premier Secure Courier",
@@ -13,45 +14,41 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800">
       {/* Section 1: Hero Banner */}
-      <section className="bg-navy-950 text-white py-16 md:py-24">
+      <section className="bg-navy-950 text-white py-16 md:py-20">
         <div className="max-w-4xl mx-auto text-center px-4 space-y-4">
           <div className="inline-flex items-center gap-2 bg-navy-900 border border-navy-800 px-3 py-1 rounded-full text-xs font-mono text-slate-300">
             <span>Registration No. CS120930824</span>
             <span className="text-slate-600">•</span>
             <span>TIN C0064381064</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-0.025em] leading-[1.15]">
             About Luminex Logistics
           </h1>
-          <p className="text-slate-300 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Ghana’s premier secure document delivery network, engineered for law firms, financial institutions, diplomatic missions, and corporate enterprises.
           </p>
         </div>
       </section>
 
-      {/* Section 2: Key Operational & Financial Stats */}
+      {/* Section 2: Key Operational Metrics */}
       <section className="bg-white py-12 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 text-center">
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 col-span-2 sm:col-span-1">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">$5M–$7M</div>
-              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Estimated Pipeline Valuation</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 text-center">
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200/80">
+              <div className="text-2xl sm:text-3xl font-bold text-navy-900 mb-1">10,000+</div>
+              <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Documents Delivered Annually</div>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">10,000+</div>
-              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Documents Delivered Annually</div>
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200/80">
+              <div className="text-2xl sm:text-3xl font-bold text-navy-900 mb-1">99.9%</div>
+              <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider">On-Time Fulfillment Rate</div>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">99.9%</div>
-              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">On-Time Fulfillment Rate</div>
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200/80">
+              <div className="text-2xl sm:text-3xl font-bold text-navy-900 mb-1">50+</div>
+              <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Corporate &amp; Legal Partners</div>
             </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">50+</div>
-              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Corporate & Legal Partners</div>
-            </div>
-            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 col-span-2 sm:col-span-1">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-red-500 mb-1">3</div>
-              <div className="text-xs font-bold text-navy-900 uppercase tracking-wider">Regional Custody Hubs</div>
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200/80">
+              <div className="text-2xl sm:text-3xl font-bold text-navy-900 mb-1">100%</div>
+              <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Verified ID Handover</div>
             </div>
           </div>
         </div>
@@ -60,45 +57,45 @@ export default function AboutPage() {
       {/* Section 3: Story & Core Mission */}
       <section className="py-16 md:py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-            <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-              Engineered for Integrity & Scale
-            </h2>
-          </div>
-          <p className="text-slate-500 max-w-2xl pl-4 text-base leading-relaxed">
-            Founded to eliminate chain-of-custody risks in high-value document transit across West Africa with solid institutional backing.
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+            Corporate Overview
+          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+            Engineered for Integrity &amp; Scale
+          </h2>
+          <p className="mt-3 text-slate-600 max-w-[58ch] text-sm sm:text-base leading-relaxed">
+            Founded to eliminate chain-of-custody risks in high-value document transit across Ghana with verifiable operational standards.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-slate-600 leading-relaxed">
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-3">
-            <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-brand-red-500" />
+            <h3 className="text-base font-semibold text-navy-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-brand-red-500 shrink-0" />
               Corporate Mission
             </h3>
             <p>
-              Luminex Logistics operates under strict ISO-compliant security standards. We guarantee tamper-evident physical transport, real-time GPS telemetry, and legal proof-of-delivery signatures for confidential corporate assets.
+              Luminex Logistics operates under strict quality and custody protocols. We guarantee tamper-evident physical transport, real-time status tracking, and verified proof-of-delivery records for confidential corporate consignments.
             </p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-3">
-            <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-brand-red-500" />
+            <h3 className="text-base font-semibold text-navy-900 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-brand-red-500 shrink-0" />
               Chain-of-Custody Standard
             </h3>
             <p>
-              Every consignment receives an encrypted Consignment Security Number (CSN) at intake. From physical vault sorting to doorstep ID verification via Ghana Card or Passport, our protocols maintain total audit readiness.
+              Every consignment receives a unique Consignment Security Number (CSN) at intake. From central vault staging to doorstep ID verification via Ghana Card or Passport, our protocols maintain complete audit readiness.
             </p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs space-y-3">
-            <h3 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-              <Award className="w-5 h-5 text-brand-red-500" />
-              Market Valuation & Growth
+            <h3 className="text-base font-semibold text-navy-900 flex items-center gap-2">
+              <Award className="w-4 h-4 text-brand-red-500 shrink-0" />
+              Statutory Governance
             </h3>
             <p>
-              With expanding long-term institutional pipelines across legal, banking, and government sectors, Luminex Logistics operates with an estimated enterprise valuation of <strong>$5M–$7M</strong>, reflecting deep market trust and scalable operational assets.
+              Registered in the Republic of Ghana (Reg. No. CS120930824), Luminex aligns every dispatch workflow with the Data Protection Act, 2012 (Act 843) and the Electronic Transactions Act, 2008 (Act 772).
             </p>
           </div>
         </div>
@@ -108,14 +105,14 @@ export default function AboutPage() {
       <section className="bg-white py-16 border-t border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-              <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-                Certifications & Compliance
-              </h2>
-            </div>
-            <p className="text-slate-500 max-w-2xl pl-4 text-base">
-              Fully compliant with national regulatory frameworks and international logistics standards.
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+              Compliance &amp; Licensing
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+              Certifications &amp; Compliance
+            </h2>
+            <p className="mt-3 text-slate-600 max-w-[58ch] text-sm sm:text-base leading-relaxed">
+              Aligned with national regulatory frameworks and international document logistics standards.
             </p>
           </div>
 
@@ -162,13 +159,13 @@ export default function AboutPage() {
       <section id="operations" className="bg-white py-16 border-t border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-1.5 h-8 bg-brand-red-500 rounded-full shrink-0" />
-              <h2 className="text-3xl md:text-4xl font-black text-navy-900 tracking-tight">
-                Headquarters & Dispatch Hub
-              </h2>
-            </div>
-            <p className="text-slate-500 max-w-2xl pl-4 text-base">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-red-600 mb-2">
+              Headquarters &amp; Dispatch
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-navy-900 tracking-[-0.025em] leading-[1.18]">
+              Headquarters &amp; Dispatch Hub
+            </h2>
+            <p className="mt-3 text-slate-600 max-w-[58ch] text-sm sm:text-base leading-relaxed">
               Visit our central Accra operational headquarters or contact our dispatch desk.
             </p>
           </div>
@@ -192,11 +189,18 @@ export default function AboutPage() {
               </h3>
               <div className="flex items-start gap-3 text-sm text-slate-600">
                 <MapPin className="w-5 h-5 text-brand-red-500 shrink-0 mt-0.5" />
-                <span>H302 Sowah Larbi Ave, Accra, Ghana</span>
+                <span>{SITE_CONFIG.address}</span>
               </div>
-              <div className="flex items-start gap-3 text-sm text-slate-600">
+              <div className="flex items-start gap-3 text-sm text-slate-600 tabular-nums">
                 <Clock className="w-5 h-5 text-brand-red-500 shrink-0 mt-0.5" />
-                <span>Monday – Friday: 08:00 – 18:00 GMT<br />Saturday: 09:00 – 13:00 GMT</span>
+                <span>
+                  {SITE_CONFIG.hours.map((rule, idx) => (
+                    <React.Fragment key={rule.label}>
+                      {idx > 0 && <br />}
+                      {rule.label}: {rule.open} – {rule.close} GMT
+                    </React.Fragment>
+                  ))}
+                </span>
               </div>
             </div>
           </div>

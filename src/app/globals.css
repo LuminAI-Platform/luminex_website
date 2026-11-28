@@ -62,3 +62,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #c0392b;
 }
+
+/* Offset anchor targets for sticky navbar without disabling native scroll momentum */
+html {
+  scroll-padding-top: 5.5rem;
+}

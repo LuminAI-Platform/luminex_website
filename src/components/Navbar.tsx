@@ -174,8 +174,16 @@ export default function Navbar() {
     return pathname === href;
   };
 
-  /** Handle smooth-scroll for hash links and scroll-to-top for Home. */
-  const handleLinkClick = (href: string) => {
+  /** Handle smooth-scroll for hash links and scroll-to-top for current page links. */
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    const scrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches
+      ? "auto"
+      : "smooth";
+
     if (href.startsWith("/#")) {
       const targetHash = href.replace("/", "");
       setActiveHash(targetHash);
@@ -183,14 +191,19 @@ export default function Navbar() {
         const targetId = targetHash.replace("#", "");
         const elem = document.getElementById(targetId);
         if (elem) {
-          elem.scrollIntoView({ behavior: "smooth" });
+          e.preventDefault();
+          elem.scrollIntoView({ behavior: scrollBehavior });
         }
       }
-    } else if (href === "/") {
-      setActiveHash("");
-      if (pathname === "/") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (pathname === href) {
+      e.preventDefault();
+      if (href === "/") {
+        setActiveHash("");
       }
+      window.scrollTo({ top: 0, behavior: scrollBehavior });
     }
   };
 
@@ -200,7 +213,8 @@ export default function Navbar() {
         {/* ── Brand Logo ──────────────────────────────────────────── */}
         <Link
           href="/"
-          onClick={() => handleLinkClick("/")}
+          aria-current={checkIsActive("/") ? "page" : undefined}
+          onClick={(e) => handleLinkClick(e, "/")}
           className="flex items-center gap-2.5 shrink-0"
         >
           <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded overflow-hidden">
@@ -231,7 +245,8 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => handleLinkClick(link.href)}
+                aria-current={isActive ? "page" : undefined}
+                onClick={(e) => handleLinkClick(e, link.href)}
                 className={`py-1 transition-colors duration-200 border-b-2 ${isActive
                   ? "text-brand-red-600 font-semibold border-brand-red-600"
                   : "border-transparent hover:text-brand-red-600"
@@ -247,6 +262,8 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/track"
+            aria-current={pathname === "/track" ? "page" : undefined}
+            onClick={(e) => handleLinkClick(e, "/track")}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded font-bold text-sm border transition-colors duration-200 ${pathname === "/track"
               ? "border-brand-red-600 text-brand-red-600 bg-brand-red-50"
               : "border-slate-300 text-slate-700 hover:border-navy-900 hover:text-navy-900"
@@ -257,6 +274,8 @@ export default function Navbar() {
           </Link>
           <Link
             href="/book"
+            aria-current={pathname === "/book" ? "page" : undefined}
+            onClick={(e) => handleLinkClick(e, "/book")}
             className={`px-4 py-2 rounded font-bold text-sm text-white transition-colors duration-200 ${pathname === "/book"
               ? "bg-brand-red-600"
               : "bg-slate-900 hover:bg-brand-red-600"
@@ -312,8 +331,9 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => {
-                  handleLinkClick(link.href);
+                aria-current={isActive ? "page" : undefined}
+                onClick={(e) => {
+                  handleLinkClick(e, link.href);
                   setIsOpen(false);
                 }}
                 className={`block py-2.5 px-3 rounded-lg font-semibold text-sm transition-colors duration-150 ${isActive
@@ -330,7 +350,11 @@ export default function Navbar() {
           <div className="flex flex-col gap-2.5 pt-3 mt-2 border-t border-slate-100">
             <Link
               href="/track"
-              onClick={() => setIsOpen(false)}
+              aria-current={pathname === "/track" ? "page" : undefined}
+              onClick={(e) => {
+                handleLinkClick(e, "/track");
+                setIsOpen(false);
+              }}
               className="flex items-center justify-center gap-2 border border-slate-300 text-slate-700 py-2.5 rounded-lg font-bold text-sm hover:border-navy-900 hover:text-navy-900 transition-colors duration-200"
             >
               <Truck className="w-4 h-4" />
@@ -338,7 +362,11 @@ export default function Navbar() {
             </Link>
             <Link
               href="/book"
-              onClick={() => setIsOpen(false)}
+              aria-current={pathname === "/book" ? "page" : undefined}
+              onClick={(e) => {
+                handleLinkClick(e, "/book");
+                setIsOpen(false);
+              }}
               className="block text-center bg-slate-900 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-brand-red-600 transition-colors duration-200"
             >
               Book Courier
