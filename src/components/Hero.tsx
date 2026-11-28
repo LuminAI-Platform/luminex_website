@@ -13,14 +13,14 @@ import { Truck } from "lucide-react";
 export default function Hero() {
   return (
     <section className="relative w-full min-h-[60vh] md:min-h-[70vh] flex items-center justify-center bg-navy-950 text-white overflow-hidden py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
-      {/* Background Image — optimized via next/image */}
+      {/* Background Image — optimized via next/image (GPU-composited grayscale instead of CPU mix-blend) */}
       <Image
         src="/hero-fold.jpg"
         alt=""
         fill
         sizes="100vw"
         priority
-        className="object-cover object-center opacity-40 mix-blend-luminosity"
+        className="object-cover object-center opacity-40 grayscale"
       />
 
       {/* Dark Gradient Overlay for readability */}
@@ -41,7 +41,7 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md">
           <Link
             href="/track"
-            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center gap-2.5 px-6 py-3 sm:py-3.5 bg-brand-red-500 hover:bg-brand-red-600 text-white font-bold text-sm rounded shadow-lg transition-all duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
+            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center gap-2.5 px-6 py-3 sm:py-3.5 bg-brand-red-500 hover:bg-brand-red-600 text-white font-bold text-sm rounded shadow-lg transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
           >
             <Truck className="w-5 h-5 shrink-0" />
             <span>Track Shipment</span>
@@ -49,7 +49,7 @@ export default function Hero() {
 
           <Link
             href="/book"
-            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center px-6 py-3 sm:py-3.5 bg-navy-900/80 hover:bg-navy-800 border border-slate-600 hover:border-slate-400 text-white font-semibold text-sm rounded backdrop-blur-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
+            className="w-full sm:w-auto min-w-0 inline-flex items-center justify-center px-6 py-3 sm:py-3.5 bg-navy-900/90 hover:bg-navy-800 border border-slate-600 hover:border-slate-400 text-white font-semibold text-sm rounded transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
           >
             Book Services
           </Link>

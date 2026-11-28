@@ -139,8 +139,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} min-h-full scroll-smooth`}
+      className={`${geistSans.variable} ${geistMono.variable} min-h-full`}
     >
       <head>
         <script

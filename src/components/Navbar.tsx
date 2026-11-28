@@ -56,24 +56,38 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  // ── Scroll spy for homepage sections ───────────────────────────────
+  // ── Scroll spy for homepage sections (zero-reflow cached offset) ────
   useEffect(() => {
     if (pathname !== "/") return;
 
     let rafId: number | null = null;
-    let intersectionObserver: IntersectionObserver | null = null;
+    let servicesPageTop: number | null = null;
+    let viewportHeight = window.innerHeight;
+    let resizeObserver: ResizeObserver | null = null;
     let mutationObserver: MutationObserver | null = null;
+
+    const measureSection = () => {
+      viewportHeight = window.innerHeight;
+      const servicesEl = document.getElementById("services");
+      if (!servicesEl) {
+        servicesPageTop = null;
+        return false;
+      }
+      servicesPageTop =
+        servicesEl.getBoundingClientRect().top + window.scrollY;
+      return true;
+    };
 
     const updateActiveSection = () => {
       rafId = null;
-      const servicesEl = document.getElementById("services");
-      if (!servicesEl) return;
+      if (servicesPageTop === null && !measureSection()) return;
+      if (servicesPageTop === null) return;
 
-      const rect = servicesEl.getBoundingClientRect();
       // Activate Services as soon as Core Competencies enters the upper 55% of the viewport
-      const triggerY = Math.max(140, window.innerHeight * 0.55);
+      const triggerY = Math.max(140, viewportHeight * 0.55);
+      const isServicesVisible = window.scrollY + triggerY >= servicesPageTop;
 
-      if (rect.top <= triggerY) {
+      if (isServicesVisible) {
         setActiveHash((prev) => (prev === "#services" ? prev : "#services"));
       } else {
         setActiveHash((prev) => (prev === "" ? prev : ""));
@@ -86,27 +100,14 @@ export default function Navbar() {
       }
     };
 
-    const attachObserver = () => {
-      const servicesEl = document.getElementById("services");
-      if (!servicesEl || intersectionObserver) return false;
-
-      intersectionObserver = new IntersectionObserver(
-        () => {
-          updateActiveSection();
-        },
-        {
-          root: null,
-          rootMargin: "-15% 0px -45% 0px",
-          threshold: [0, 0.05, 0.15, 0.3, 0.5, 0.75, 1],
-        }
-      );
-      intersectionObserver.observe(servicesEl);
-      return true;
+    const handleResize = () => {
+      measureSection();
+      scheduleUpdate();
     };
 
-    if (!attachObserver()) {
+    if (!measureSection()) {
       mutationObserver = new MutationObserver(() => {
-        if (attachObserver()) {
+        if (measureSection()) {
           mutationObserver?.disconnect();
           mutationObserver = null;
           scheduleUpdate();
@@ -116,6 +117,14 @@ export default function Navbar() {
         childList: true,
         subtree: true,
       });
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        measureSection();
+        scheduleUpdate();
+      });
+      resizeObserver.observe(document.body);
     }
 
     const handleHashChange = () => {
@@ -136,13 +145,7 @@ export default function Navbar() {
     }
 
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    document.addEventListener("scroll", scheduleUpdate, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("wheel", scheduleUpdate, { passive: true });
-    window.addEventListener("touchmove", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("popstate", handleHashChange);
 
@@ -150,13 +153,10 @@ export default function Navbar() {
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
-      intersectionObserver?.disconnect();
+      resizeObserver?.disconnect();
       mutationObserver?.disconnect();
       window.removeEventListener("scroll", scheduleUpdate);
-      document.removeEventListener("scroll", scheduleUpdate, { capture: true });
-      window.removeEventListener("wheel", scheduleUpdate);
-      window.removeEventListener("touchmove", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("hashchange", handleHashChange);
       window.removeEventListener("popstate", handleHashChange);
     };
@@ -301,7 +301,7 @@ export default function Navbar() {
       {/* ── Mobile Drawer (animated slide-down) ──────────────────── */}
       <div
         ref={drawerRef}
-        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        className={`lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           }`}
         aria-hidden={!isOpen}
       >

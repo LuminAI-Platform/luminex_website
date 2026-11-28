@@ -113,7 +113,7 @@ export default function CookieConsent() {
       className={`
         fixed inset-x-0 bottom-0 z-[60]
         px-3 pb-3 sm:px-4 sm:pb-4
-        transition-all duration-500
+        transition-[transform,opacity] duration-500
         ease-[cubic-bezier(0.22,1,0.36,1)]
         motion-reduce:transition-none
         ${
@@ -129,10 +129,9 @@ export default function CookieConsent() {
           overflow-hidden
           rounded-2xl
           border border-white/10
-          bg-navy-950/95
+          bg-navy-950
           text-white
           shadow-[0_20px_60px_rgba(0,0,0,0.28)]
-          backdrop-blur-md
         "
       >
         <div
